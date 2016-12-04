@@ -7,11 +7,11 @@ services:
       - 5432
     image: postgres:9.6.1-alpine
   auth-service:
+    command: /usr/local/bin/wait-for-it.sh db:5432 --strict -- /usr/local/bin/auth-service
     depends_on:
       - db
     environment:
       TOKEN_SECRET:
     image: houli/auth-service
-    command: /data/script/wait-for-it.sh db:5432 --strict -- /usr/local/bin/auth-service
     ports:
       - "8080:8080"
