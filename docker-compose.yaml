@@ -11,6 +11,7 @@ services:
       - db
     environment:
       TOKEN_SECRET:
-    image: auth-service-auth-service
+    image: houli/auth-service
+    command: /data/script/wait-for-it.sh db:5432 --strict -- /usr/local/bin/auth-service
     ports:
       - "8080:8080"

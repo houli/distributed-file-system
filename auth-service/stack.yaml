@@ -69,6 +69,7 @@ docker:
 
 image:
   container:
+    name: houli/auth-service
     base: fpco/stack-run
-    entrypoints:
-      - auth-service
+    add:
+      script: /data/script
