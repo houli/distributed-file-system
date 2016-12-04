@@ -28,9 +28,6 @@ User json
   deriving Show
 |]
 
-connectionString :: ConnectionString
-connectionString = "host=db port=5432 dbname=dfs user=postgresql"
-
 runMigrations :: SqlPersistT IO ()
 runMigrations = runMigration migrateAll
 
