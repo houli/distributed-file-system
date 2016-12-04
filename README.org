@@ -3,7 +3,10 @@
 
 ** Building
 #+BEGIN_SRC bash
-$ stack setup && stack build
+$ ./build.sh
 #+END_SRC
 
 ** Running
+#+BEGIN_SRC bash
+$ docker-compose up -d
+#+END_SRC
