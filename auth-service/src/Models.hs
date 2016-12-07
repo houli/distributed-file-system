@@ -3,7 +3,6 @@
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE QuasiQuotes                #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
@@ -11,19 +10,17 @@
 module Models
   ( runDb
   , runMigrations
-  , User
+  , User(..)
   ) where
 
-import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Reader
-import Data.Text
-import Database.Persist.Postgresql
-import Database.Persist.Sql
-import Database.Persist.TH
+import Control.Monad.Reader (MonadIO(..), MonadReader(..))
+import Database.Persist.Postgresql (runMigration, runSqlPool, ConnectionPool, SqlPersistT)
+import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
-  username Text
+  username String
+  password String
   UniqueUsername username
   deriving Show
 |]
@@ -33,5 +30,5 @@ runMigrations = runMigration migrateAll
 
 runDb :: (MonadReader ConnectionPool m, MonadIO m) => SqlPersistT IO a -> m a
 runDb query = do
-    pool <- ask
-    liftIO $ runSqlPool query pool
+  pool <- ask
+  liftIO $ runSqlPool query pool
