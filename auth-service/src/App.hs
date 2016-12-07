@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds                  #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TypeOperators              #-}
 
@@ -7,7 +6,6 @@ module App
   ( app
   ) where
 
-import Control.Monad.Except
 import Control.Monad.Reader
 import Crypto.PasswordStore (makePassword)
 import Data.ByteString.Char8 (pack, unpack)
@@ -17,16 +15,10 @@ import Servant
 import AuthAPI (AuthAPI, UserCreationResponse(..))
 import Models (runDb, User(..))
 
-newtype App a = App
-              { runApp :: ReaderT ConnectionPool Handler a
-              } deriving (Functor, Applicative, Monad, MonadReader ConnectionPool,
-                          MonadError ServantErr, MonadIO)
+type App = ReaderT ConnectionPool Handler
 
 appToServer :: ConnectionPool -> Server AuthAPI
-appToServer pool = enter (convertApp pool) server
-
-convertApp :: ConnectionPool -> App :~> Handler
-convertApp pool = Nat (flip runReaderT pool . runApp)
+appToServer pool = enter (runReaderTNat pool) server
 
 api :: Proxy AuthAPI
 api = Proxy
