@@ -34,13 +34,17 @@ app jwtSettings pool = serveWithContext api context (appToServer jwtSettings poo
 server :: JWTSettings -> ServerT (AuthAPI auths) App
 server jwts = register jwts :<|> login jwts :<|> verifyJWT
 
-createUser :: User -> App UserCreationResponse
-createUser user = do
-  hashedPassword <- liftIO $ makePassword (pack $ userPassword user) 17
+register :: JWTSettings -> User -> App (Headers '[Header "Token" ByteString] UserCreationResponse)
+register jwts user = do
+  let hashRounds = 17 -- PKBDF1 hashing iterations
+  hashedPassword <- liftIO $ makePassword (pack $ userPassword user) hashRounds
   newOrExistingUser <- runDb $ insertBy user { userPassword = unpack hashedPassword }
   case newOrExistingUser of
     Left _ -> throwError err500 { errBody = "Username already taken" }
-    Right newUser -> pure UserCreationResponse { userId = fromSqlKey newUser}
+    Right newUser -> do
+      jwt <- createToken 60 user jwts
+      pure $ addHeader jwt UserCreationResponse { userId = fromSqlKey newUser }
+
 login :: JWTSettings -> User -> App (Headers '[Header "Token" ByteString] NoContent)
 login jwts login = do
   maybeUser <- runDb $ getBy $ UniqueUsername (userUsername login)
