@@ -1,33 +1,38 @@
-{-# LANGUAGE DataKinds                  #-}
-{-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE TypeOperators              #-}
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeOperators     #-}
 
 module App
   ( app
   ) where
 
 import Control.Monad.Reader
-import Crypto.PasswordStore (makePassword)
+import Crypto.PasswordStore (makePassword, verifyPassword)
 import Data.ByteString.Char8 (pack, unpack)
-import Database.Persist.Postgresql (fromSqlKey, insertBy, ConnectionPool)
+import Data.ByteString.Lazy (ByteString)
+import Data.Time.Clock (addUTCTime, getCurrentTime, NominalDiffTime)
+import Database.Persist.Postgresql (entityVal, fromSqlKey, getBy, insertBy, ConnectionPool)
 import Servant
+import Servant.Auth.Server
 
 import AuthAPI (AuthAPI, UserCreationResponse(..))
-import Models (runDb, User(..))
+import Models (runDb, User(..), Unique(..))
 
+-- Type alias custom monad to handle passing the Postgres connection pool around
 type App = ReaderT ConnectionPool Handler
 
-appToServer :: ConnectionPool -> Server AuthAPI
-appToServer pool = enter (runReaderTNat pool) server
+appToServer :: JWTSettings -> ConnectionPool -> Server (AuthAPI auths)
+appToServer jwtSettings pool = enter (runReaderTNat pool) (server jwtSettings)
 
-api :: Proxy AuthAPI
+api :: Proxy (AuthAPI '[JWT])
 api = Proxy
 
-app :: ConnectionPool -> Application
-app pool = serve api (appToServer pool)
+app :: JWTSettings -> ConnectionPool -> Application
+app jwtSettings pool = serveWithContext api context (appToServer jwtSettings pool)
+  where context = defaultCookieSettings :. jwtSettings :. EmptyContext
 
-server :: ServerT AuthAPI App
-server = createUser
+server :: JWTSettings -> ServerT (AuthAPI auths) App
+server jwts = register jwts :<|> login jwts :<|> verifyJWT
 
 createUser :: User -> App UserCreationResponse
 createUser user = do
@@ -36,3 +41,23 @@ createUser user = do
   case newOrExistingUser of
     Left _ -> throwError err500 { errBody = "Username already taken" }
     Right newUser -> pure UserCreationResponse { userId = fromSqlKey newUser}
+login :: JWTSettings -> User -> App (Headers '[Header "Token" ByteString] NoContent)
+login jwts login = do
+  maybeUser <- runDb $ getBy $ UniqueUsername (userUsername login)
+  case maybeUser of
+    Nothing -> loginError -- Username doesn't exist
+    Just user -> if verifyPassword (pack $ userPassword login) (pack $ userPassword $ entityVal user)
+                 then do
+                   jwt <- createToken 60 login jwts
+                   pure $ addHeader jwt NoContent
+                 else loginError -- Incorrect password
+  where loginError = throwError err401 { errBody = "Incorrect username or password" }
+
+createToken :: NominalDiffTime -> User -> JWTSettings -> App ByteString
+createToken expiryMinutes user jwts = do
+  time <- liftIO getCurrentTime
+  let expiryTime = addUTCTime (expiryMinutes * 60) time
+  eitherJWT <- liftIO $ makeJWT user jwts (Just expiryTime)
+  case eitherJWT of
+    Left _ -> throwError err500 { errBody = "Unable to create JWT" }
+    Right jwt -> pure jwt
