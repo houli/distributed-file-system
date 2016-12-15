@@ -65,3 +65,7 @@ createToken expiryMinutes user jwts = do
   case eitherJWT of
     Left _ -> throwError err500 { errBody = "Unable to create JWT" }
     Right jwt -> pure jwt
+
+verifyJWT :: AuthResult User -> App NoContent
+verifyJWT (Authenticated _) = pure NoContent
+verifyJWT _ = throwError err401
