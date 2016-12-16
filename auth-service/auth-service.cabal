@@ -36,9 +36,12 @@ executable auth-service
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
+                     , aeson
                      , auth-service
+                     , bytestring
                      , monad-logger
                      , persistent-postgresql
+                     , servant-auth-server
                      , wai-extra
                      , warp
   default-language:    Haskell2010
