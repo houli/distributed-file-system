@@ -22,7 +22,6 @@ library
                      , aeson
                      , bytestring
                      , mtl
-                     , persistent
                      , persistent-postgresql
                      , persistent-template
                      , pwstore-fast
