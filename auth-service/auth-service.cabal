@@ -16,14 +16,11 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     App
-                     , Models
-  other-modules:       AuthAPI
   build-depends:       base >= 4.7 && < 5
-                     , aeson
                      , bytestring
+                     , dfs-shared
                      , mtl
                      , persistent-postgresql
-                     , persistent-template
                      , pwstore-fast
                      , servant-auth-server
                      , servant-server
@@ -38,6 +35,7 @@ executable auth-service
                      , aeson
                      , auth-service
                      , bytestring
+                     , dfs-shared
                      , monad-logger
                      , persistent-postgresql
                      , servant-auth-server

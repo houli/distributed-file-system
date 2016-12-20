@@ -15,7 +15,7 @@ import Database.Persist.Postgresql (entityVal, fromSqlKey, getBy, insertBy, Conn
 import Servant
 import Servant.Auth.Server
 
-import AuthAPI (AuthAPI, UserCreationResponse(..))
+import AuthAPI (authAPIProxy, AuthAPI, UserCreationResponse(..))
 import Models (runDb, User(..), Unique(..))
 
 -- Type alias custom monad to handle passing the Postgres connection pool around
@@ -24,11 +24,8 @@ type App = ReaderT ConnectionPool Handler
 appToServer :: JWTSettings -> ConnectionPool -> Server (AuthAPI auths)
 appToServer jwtSettings pool = enter (runReaderTNat pool) (server jwtSettings)
 
-api :: Proxy (AuthAPI '[JWT])
-api = Proxy
-
 app :: JWTSettings -> ConnectionPool -> Application
-app jwtSettings pool = serveWithContext api context (appToServer jwtSettings pool)
+app jwtSettings pool = serveWithContext authAPIProxy context (appToServer jwtSettings pool)
   where context = defaultCookieSettings :. jwtSettings :. EmptyContext
 
 server :: JWTSettings -> ServerT (AuthAPI auths) App
