@@ -37,9 +37,16 @@ resolver: lts-7.11
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
+- location: ../dfs-shared
+  extra-dep: true
+
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps: []
+extra-deps:
+- jose-0.5.0.1
+- servant-auth-0.2.1.0
+- servant-auth-client-0.2.1.0
+- servant-auth-server-0.2.1.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}

@@ -4,23 +4,26 @@
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE QuasiQuotes                #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
 
 module Models
-  ( runDb
+  ( connStr
+  , runDb
   , runMigrations
   , Unique(..)
   , User(..)
   ) where
 
 import Control.Monad.Reader (MonadIO(..), MonadReader(..))
-import Database.Persist.Postgresql (runMigration, runSqlPool, ConnectionPool, SqlPersistT, Unique)
+import Database.Persist.Postgresql (runMigration, runSqlPool, ConnectionPool, ConnectionString, SqlPersistT, Unique)
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import GHC.Generics (Generic)
 import Servant.Auth.Server (FromJWT, ToJWT)
 
+-- Declare shared data models
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
   username String
@@ -39,3 +42,6 @@ runDb :: (MonadReader ConnectionPool m, MonadIO m) => SqlPersistT IO a -> m a
 runDb query = do
   pool <- ask
   liftIO $ runSqlPool query pool
+
+connStr :: ConnectionString
+connStr = "host=db port=5432 dbname=dfs user=postgres"
