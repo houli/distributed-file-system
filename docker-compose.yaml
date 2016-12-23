@@ -20,3 +20,10 @@ services:
     image: houli/file-service
     ports:
       - "8081:8081"
+  migrator:
+    command: /usr/local/bin/wait-for-it.sh db:5432 --strict -- /usr/local/bin/migrator
+    depends_on:
+      - db
+    expose:
+      - 8000
+    image: houli/migrator
