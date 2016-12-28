@@ -17,10 +17,7 @@ main = do
   pool <- runStdoutLoggingT $ createPostgresqlPool connStr 5
   runSqlPool runMigrations pool
   withSocketsDo $ do
-    addrinfos <- getAddrInfo
-                     (Just (defaultHints { addrFlags = [AI_PASSIVE] }))
-                     Nothing (Just "8000")
-    let serveraddr = head addrinfos
+    (serveraddr : _) <- getAddrInfo (Just (defaultHints { addrFlags = [AI_PASSIVE] })) Nothing (Just "8000")
     sock <- socket (addrFamily serveraddr) Stream defaultProtocol
     bind sock (addrAddress serveraddr)
     listen sock 5
