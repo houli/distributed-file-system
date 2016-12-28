@@ -6,20 +6,25 @@ services:
     expose:
       - 5432
     image: postgres:9.6.1-alpine
+
   auth-service:
-    command: /usr/local/bin/wait-for-it.sh db:5432 --strict -- /usr/local/bin/auth-service
+    command: /usr/local/bin/wait-for-it.sh migrator:8000 --strict -- /usr/local/bin/auth-service
     depends_on:
       - db
+      - migrator
     image: houli/auth-service
     ports:
       - "8080:8080"
+
   file-service:
-    command: /usr/local/bin/wait-for-it.sh db:5432 --strict -- /usr/local/bin/file-service
+    command: /usr/local/bin/wait-for-it.sh migrator:8000 --strict -- /usr/local/bin/file-service
     depends_on:
       - db
+      - migrator
     image: houli/file-service
     ports:
       - "8081:8081"
+
   migrator:
     command: /usr/local/bin/wait-for-it.sh db:5432 --strict -- /usr/local/bin/migrator
     depends_on:
