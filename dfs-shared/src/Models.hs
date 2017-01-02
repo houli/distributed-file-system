@@ -11,7 +11,7 @@
 
 module Models
   ( connStr
-  , runDb
+  , runDB
   , runMigrations
   , Unique(..)
   , User(..)
@@ -38,8 +38,8 @@ instance FromJWT User
 runMigrations :: SqlPersistT IO ()
 runMigrations = runMigration migrateAll
 
-runDb :: (MonadReader ConnectionPool m, MonadIO m) => SqlPersistT IO a -> m a
-runDb query = do
+runDB :: (MonadReader ConnectionPool m, MonadIO m) => SqlPersistT IO a -> m a
+runDB query = do
   pool <- ask
   liftIO $ runSqlPool query pool
 

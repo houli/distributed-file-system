@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeOperators     #-}
 
 module App
   ( app
@@ -16,7 +15,7 @@ import Servant
 import Servant.Auth.Server
 
 import AuthAPI (authAPIProxy, AuthAPI, UserCreationResponse(..))
-import Models (runDb, User(..), Unique(..))
+import Models (runDB, User(..), Unique(..))
 
 -- Type alias custom monad to handle passing the Postgres connection pool around
 type App = ReaderT ConnectionPool Handler
@@ -35,7 +34,7 @@ register :: JWTSettings -> User -> App (Headers '[Header "Token" ByteString] Use
 register jwts user = do
   let hashRounds = 17 -- PKBDF1 hashing iterations
   hashedPassword <- liftIO $ makePassword (pack $ userPassword user) hashRounds
-  newOrExistingUser <- runDb $ insertBy user { userPassword = unpack hashedPassword }
+  newOrExistingUser <- runDB $ insertBy user { userPassword = unpack hashedPassword }
   case newOrExistingUser of
     Left _ -> throwError err500 { errBody = "Username already taken" }
     Right newUser -> do
@@ -44,7 +43,7 @@ register jwts user = do
 
 login :: JWTSettings -> User -> App (Headers '[Header "Token" ByteString] NoContent)
 login jwts login = do
-  maybeUser <- runDb $ getBy $ UniqueUsername (userUsername login)
+  maybeUser <- runDB $ getBy $ UniqueUsername (userUsername login)
   case maybeUser of
     Nothing -> loginError -- Username doesn't exist
     Just user -> if verifyPassword (pack $ userPassword login) (pack $ userPassword $ entityVal user)
