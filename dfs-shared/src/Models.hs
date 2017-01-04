@@ -18,7 +18,7 @@ module Models
   , User(..)
   ) where
 
-import Control.Monad.Reader (MonadIO(..), MonadReader(..))
+import Control.Monad.Reader (asks, MonadIO(..), MonadReader(..))
 import Database.Persist.Postgresql (runMigration, runSqlPool, ConnectionPool, ConnectionString, SqlPersistT, Unique)
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import GHC.Generics (Generic)
@@ -45,9 +45,9 @@ class HasConnectionPool a where
 instance HasConnectionPool ConnectionPool where
   connectionPool = id
 
-runDB :: (MonadReader ConnectionPool m, MonadIO m) => SqlPersistT IO a -> m a
+runDB :: HasConnectionPool a => (MonadReader a m, MonadIO m) => SqlPersistT IO b -> m b
 runDB query = do
-  pool <- ask
+  pool <- asks connectionPool
   liftIO $ runSqlPool query pool
 
 connStr :: ConnectionString
