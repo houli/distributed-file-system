@@ -13,6 +13,7 @@ module Models
   ( connStr
   , runDB
   , runMigrations
+  , HasConnectionPool(..)
   , Unique(..)
   , User(..)
   ) where
@@ -37,6 +38,12 @@ instance FromJWT User
 
 runMigrations :: SqlPersistT IO ()
 runMigrations = runMigration migrateAll
+
+class HasConnectionPool a where
+  connectionPool :: a -> ConnectionPool
+
+instance HasConnectionPool ConnectionPool where
+  connectionPool = id
 
 runDB :: (MonadReader ConnectionPool m, MonadIO m) => SqlPersistT IO a -> m a
 runDB query = do
