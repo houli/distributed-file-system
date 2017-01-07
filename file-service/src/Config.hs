@@ -1,12 +1,11 @@
 module Config where
 
-import Control.Monad.Reader
 import Database.Persist.Postgresql (ConnectionPool)
 import GHC.Int (Int64)
 import Network.HTTP.Client (Manager)
 import Servant.Client (BaseUrl)
 
-import Models
+import Models (HasConnectionPool(..))
 
 data Config = Config
   { pool :: ConnectionPool
