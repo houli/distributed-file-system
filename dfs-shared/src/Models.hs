@@ -13,9 +13,14 @@ module Models
   ( connStr
   , runDB
   , runMigrations
+  , File(..)
+  , FileId
   , HasConnectionPool(..)
+  , Node(..)
+  , NodeId
   , Unique(..)
   , User(..)
+  , UserId
   ) where
 
 import Control.Monad.Reader (asks, MonadIO(..), MonadReader(..))
@@ -31,7 +36,19 @@ User json
   password String
   UniqueUsername username
   deriving Show Generic
+
+Node json
+  port Int
+  UniquePort port
+  deriving Show Generic
+
+File json
+  path String
+  node NodeId
+  UniquePath path
+  deriving Show Generic
 |]
+
 -- Some instances to work with JSON Web Tokens
 instance ToJWT User
 instance FromJWT User
