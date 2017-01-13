@@ -47,4 +47,13 @@ readFileImpl maybeToken path =
 
 writeFileImpl = undefined
 
+authenticate :: Token -> App a -> App a
+authenticate token action = do
+  manager <- asks manager
+  authBase <- asks authBase
+  res <- liftIO $ runExceptT $ verifyJWT token manager authBase
+  case res of
+    Left _ -> throwError err401 { errBody = "Invalid authentication token" }
+    Right _ -> action
+
 _ :<|> _ :<|> verifyJWT = authAPIClient
