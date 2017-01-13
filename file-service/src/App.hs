@@ -33,7 +33,7 @@ app pool serverId = do
 server :: ServerT FileAPI App
 server = readFileImpl :<|> writeFileImpl
 
-readFileImpl :: Maybe String -> String -> App NoContent
+readFileImpl :: Maybe String -> String -> App HTTPFile
 readFileImpl maybeToken path =
   case maybeToken of
     Nothing -> throwError err401 { errBody = "No authentication token provided" }

@@ -7,7 +7,7 @@ module FileAPI
   ( fileAPIClient
   , fileAPIProxy
   , FileAPI
-  , FileUpload(..)
+  , HTTPFile(..)
   ) where
 
 import Data.Aeson (FromJSON, ToJSON)
@@ -16,10 +16,10 @@ import Servant
 import Servant.Client (client)
 import System.IO (FilePath)
 
-type FileAPI = "readFile" :> Header "Authorization" String :> Capture "path" FilePath :> Get '[JSON] NoContent
-          :<|> "writeFile" :> Header "Authorization" String :> ReqBody '[JSON] FileUpload :> PostNoContent '[JSON] NoContent
+type FileAPI = "readFile" :> Header "Authorization" String :> Capture "path" FilePath :> Get '[JSON] HTTPFile
+          :<|> "writeFile" :> Header "Authorization" String :> ReqBody '[JSON] HTTPFile :> PostNoContent '[JSON] NoContent
 
-data FileUpload = FileUpload
+data HTTPFile = HTTPFile
   { path :: FilePath
   , contents :: String
   } deriving (Generic, FromJSON, ToJSON)
