@@ -19,6 +19,7 @@ services:
   file-service:
     command: /usr/local/bin/wait-for-it.sh migrator:8000 --strict -- /usr/local/bin/file-service
     depends_on:
+      - auth-service
       - db
       - migrator
     image: houli/file-service

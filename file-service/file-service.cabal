@@ -18,8 +18,10 @@ library
   exposed-modules:     App
                      , Config
   build-depends:       base >= 4.7 && < 5
+                     , base64-bytestring
                      , bytestring
                      , dfs-shared
+                     , directory
                      , http-client
                      , mtl
                      , persistent-postgresql
