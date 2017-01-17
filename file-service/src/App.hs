@@ -7,7 +7,7 @@ module App
 import           Control.Monad.Except
 import           Control.Monad.Reader
 import qualified Data.ByteString as BS
-import           Data.ByteString.Base64 (encode)
+import           Data.ByteString.Base64 (decodeLenient, encode)
 import           Data.ByteString.Char8 (pack, unpack)
 import           Database.Persist.Postgresql
 import           GHC.Int (Int64)
@@ -36,12 +36,15 @@ app pool serverId = do
 server :: ServerT FileAPI App
 server = readFileImpl :<|> writeFileImpl
 
+basePath :: FilePath
+basePath = "/data/files/"
+
 readFileImpl :: Maybe String -> String -> App HTTPFile
 readFileImpl maybeToken path =
   case maybeToken of
     Nothing -> throwError err401 { errBody = "No authentication token provided" }
     Just token -> authenticate (Token $ pack token) $ do
-      let filePath = "/data/files/" ++ path
+      let filePath = basePath ++ path
       exists <- liftIO $ doesFileExist filePath
       if exists
       then do
@@ -49,11 +52,17 @@ readFileImpl maybeToken path =
         pure HTTPFile { path = path, contents = unpack $ encode fileContents }
       else throwError err404
 
-
 writeFileImpl :: Maybe String -> HTTPFile -> App NoContent
-writeFileImpl = undefined
+writeFileImpl maybeToken file =
+  case maybeToken of
+    Nothing -> throwError err401 { errBody = "No authentication token provided" }
+    Just token -> authenticate (Token $ pack token) $ do
+      let filePath = basePath ++ path file
+      let decodedContents = decodeLenient . pack $ contents file
+      liftIO $ BS.writeFile filePath decodedContents
+      pure NoContent
 
-authenticate :: Token -> App a -> App a
+authenticate :: Token-> App a -> App a
 authenticate token action = do
   manager <- asks manager
   authBase <- asks authBase
