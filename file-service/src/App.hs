@@ -4,8 +4,8 @@ module App
   ( app
   ) where
 
-import           Control.Monad.Except
-import           Control.Monad.Reader
+import           Control.Monad.Except (runExceptT)
+import           Control.Monad.Reader (asks, liftIO, ReaderT)
 import qualified Data.ByteString as BS
 import           Data.ByteString.Base64 (decodeLenient, encode)
 import           Data.ByteString.Char8 (pack, unpack)
@@ -13,12 +13,12 @@ import           Database.Persist.Postgresql
 import           GHC.Int (Int64)
 import           Network.HTTP.Client (defaultManagerSettings, newManager)
 import           Servant
-import           Servant.Auth.Client
-import           Servant.Client
+import           Servant.Auth.Client (Token(..))
+import           Servant.Client (parseBaseUrl)
 import           System.Directory (doesFileExist)
 
 import           AuthAPI (authAPIClient)
-import           Config
+import           Config (Config(..))
 import           FileAPI (fileAPIProxy, FileAPI, HTTPFile(..))
 import           Models
 

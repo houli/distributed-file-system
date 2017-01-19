@@ -5,7 +5,7 @@ module App
   ( app
   ) where
 
-import Control.Monad.Reader
+import Control.Monad.Reader (liftIO, ReaderT)
 import Crypto.PasswordStore (makePassword, verifyPassword)
 import Data.ByteString.Char8 (pack, unpack)
 import Data.ByteString.Lazy (ByteString)

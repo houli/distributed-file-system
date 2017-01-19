@@ -1,4 +1,6 @@
-module Config where
+module Config
+  ( Config(..)
+  ) where
 
 import Database.Persist.Postgresql (ConnectionPool)
 import GHC.Int (Int64)
