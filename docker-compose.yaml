@@ -1,4 +1,5 @@
 version: '2'
+
 services:
   db:
     environment:
@@ -21,6 +22,7 @@ services:
     depends_on:
       - auth-service
       - db
+      - directory-service
       - migrator
     image: houli/file-service
     ports:
@@ -29,7 +31,9 @@ services:
   directory-service:
     command: /usr/local/bin/wait-for-it.sh migrator:8000 --strict -- /usr/local/bin/directory-service
     depends_on:
+      - auth-service
       - db
+      - migrator
     image: houli/directory-service
     ports:
       - "8082:8082"
