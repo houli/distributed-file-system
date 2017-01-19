@@ -26,6 +26,14 @@ services:
     ports:
       - "8081:8081"
 
+  directory-service:
+    command: /usr/local/bin/wait-for-it.sh migrator:8000 --strict -- /usr/local/bin/directory-service
+    depends_on:
+      - db
+    image: houli/directory-service
+    ports:
+      - "8082:8082"
+
   migrator:
     command: /usr/local/bin/wait-for-it.sh db:5432 --strict -- /usr/local/bin/migrator
     depends_on:
