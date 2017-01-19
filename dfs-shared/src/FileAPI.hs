@@ -14,7 +14,6 @@ import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics (Generic)
 import Servant
 import Servant.Client (client)
-import System.IO (FilePath)
 
 type FileAPI = "readFile" :> Header "Authorization" String :> Capture "path" FilePath :> Get '[JSON] HTTPFile
           :<|> "writeFile" :> Header "Authorization" String :> ReqBody '[JSON] HTTPFile :> PostNoContent '[JSON] NoContent

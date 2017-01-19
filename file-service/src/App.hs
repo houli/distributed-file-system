@@ -62,7 +62,8 @@ writeFileImpl maybeToken file =
       liftIO $ BS.writeFile filePath decodedContents
       pure NoContent
 
-authenticate :: Token-> App a -> App a
+-- General authentication function, performs action only when succesfully authenticated
+authenticate :: Token -> App a -> App a
 authenticate token action = do
   manager <- asks manager
   authBase <- asks authBase
@@ -71,4 +72,5 @@ authenticate token action = do
     Left _ -> throwError err401 { errBody = "Invalid authentication token" }
     Right _ -> action
 
+-- Pattern match out the routes of the AuthAPI
 _ :<|> _ :<|> verifyJWT = authAPIClient
