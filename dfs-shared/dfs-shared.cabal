@@ -15,9 +15,12 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     AuthAPI
-                     , DirectoryAPI
-                     , FileAPI
+  exposed-modules:     AuthAPI.API
+                     , AuthAPI.Client
+                     , DirectoryAPI.API
+                     , DirectoryAPI.Client
+                     , FileAPI.API
+                     , FileAPI.Client
                      , Models
   build-depends:       base >= 4.7 && < 5
                      , aeson

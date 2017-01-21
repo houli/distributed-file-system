@@ -17,9 +17,9 @@ import           Servant.Auth.Client (Token(..))
 import           Servant.Client (parseBaseUrl)
 import           System.Directory (doesFileExist)
 
-import           AuthAPI (authAPIClient)
+import           AuthAPI.Client (authAPIClient)
 import           Config (Config(..))
-import           FileAPI (fileAPIProxy, FileAPI, HTTPFile(..))
+import           FileAPI.API (fileAPIProxy, FileAPI, HTTPFile(..))
 import           Models
 
 type App = ReaderT Config Handler

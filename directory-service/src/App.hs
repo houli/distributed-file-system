@@ -13,9 +13,9 @@ import Servant
 import Servant.Auth.Client (Token(..))
 import Servant.Client
 
-import AuthAPI (authAPIClient)
+import AuthAPI.Client (authAPIClient)
 import Config (Config(..))
-import DirectoryAPI (directoryAPIProxy, DirectoryAPI)
+import DirectoryAPI.API(directoryAPIProxy, DirectoryAPI)
 import Models (runDB, File(..), Node, Unique(..))
 
 type App = ReaderT Config Handler

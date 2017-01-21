@@ -3,9 +3,8 @@
 {-# LANGUAGE DeriveGeneric  #-}
 {-# LANGUAGE TypeOperators  #-}
 
-module AuthAPI
-  ( authAPIClient
-  , authAPIProxy
+module AuthAPI.API
+  ( authAPIProxy
   , AuthAPI
   , UserCreationResponse(..)
   ) where
@@ -17,7 +16,6 @@ import GHC.Int (Int64)
 import Servant ((:<|>), (:>), Get, Header, Headers, JSON, NoContent, Post, PostNoContent, Proxy(..), ReqBody)
 import Servant.Auth.Client ()
 import Servant.Auth.Server (Auth, JWT)
-import Servant.Client (client)
 
 import Models (User)
 
@@ -30,5 +28,3 @@ newtype UserCreationResponse = UserCreationResponse
 
 authAPIProxy :: Proxy (AuthAPI '[JWT])
 authAPIProxy = Proxy
-
-authAPIClient = client authAPIProxy

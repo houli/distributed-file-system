@@ -14,7 +14,7 @@ import Database.Persist.Postgresql (entityVal, fromSqlKey, getBy, insertBy, Conn
 import Servant
 import Servant.Auth.Server
 
-import AuthAPI (authAPIProxy, AuthAPI, UserCreationResponse(..))
+import AuthAPI.API (authAPIProxy, AuthAPI, UserCreationResponse(..))
 import Models (runDB, User(..), Unique(..))
 
 -- Type alias custom monad to handle passing the Postgres connection pool around

@@ -3,9 +3,8 @@
 {-# LANGUAGE DeriveGeneric  #-}
 {-# LANGUAGE TypeOperators  #-}
 
-module FileAPI
-  ( fileAPIClient
-  , fileAPIProxy
+module FileAPI.API
+  ( fileAPIProxy
   , FileAPI
   , HTTPFile(..)
   ) where
@@ -13,7 +12,6 @@ module FileAPI
 import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics (Generic)
 import Servant
-import Servant.Client (client)
 
 type FileAPI = "readFile" :> Header "Authorization" String :> Capture "path" FilePath :> Get '[JSON] HTTPFile
           :<|> "writeFile" :> Header "Authorization" String :> ReqBody '[JSON] HTTPFile :> PostNoContent '[JSON] NoContent
@@ -25,5 +23,3 @@ data HTTPFile = HTTPFile
 
 fileAPIProxy :: Proxy FileAPI
 fileAPIProxy = Proxy
-
-fileAPIClient = client fileAPIProxy

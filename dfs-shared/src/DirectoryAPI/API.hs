@@ -1,14 +1,12 @@
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE TypeOperators #-}
 
-module DirectoryAPI
-  ( directoryAPIClient
-  , directoryAPIProxy
+module DirectoryAPI.API
+  ( directoryAPIProxy
   , DirectoryAPI
   ) where
 
 import Servant
-import Servant.Client (client)
 
 import Models (File, Node)
 
@@ -18,5 +16,3 @@ type DirectoryAPI = "ls" :> Header "Authorization" String :> Get '[JSON] [File]
 
 directoryAPIProxy :: Proxy DirectoryAPI
 directoryAPIProxy = Proxy
-
-directoryAPIClient = client directoryAPIProxy
