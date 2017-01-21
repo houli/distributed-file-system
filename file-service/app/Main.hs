@@ -7,7 +7,6 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import System.Directory (createDirectoryIfMissing)
 
 import App (app)
-import Config (Config(..))
 import Models (connStr)
 
 main :: IO ()
