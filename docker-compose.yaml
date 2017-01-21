@@ -9,7 +9,7 @@ services:
     image: postgres:9.6.1-alpine
 
   auth-service:
-    command: /usr/local/bin/wait-for-it.sh migrator:8000 --strict -- /usr/local/bin/auth-service
+    command: wait-for-it.sh migrator:8000 --strict -- auth-service
     depends_on:
       - db
       - migrator
@@ -18,7 +18,7 @@ services:
       - "8080:8080"
 
   file-service:
-    command: /usr/local/bin/wait-for-it.sh migrator:8000 --strict -- /usr/local/bin/file-service
+    command: wait-for-it.sh migrator:8000 --strict -- file-service
     depends_on:
       - auth-service
       - db
@@ -29,7 +29,7 @@ services:
       - "8081:8081"
 
   directory-service:
-    command: /usr/local/bin/wait-for-it.sh migrator:8000 --strict -- /usr/local/bin/directory-service
+    command: wait-for-it.sh migrator:8000 --strict -- directory-service
     depends_on:
       - auth-service
       - db
@@ -39,7 +39,7 @@ services:
       - "8082:8082"
 
   migrator:
-    command: /usr/local/bin/wait-for-it.sh db:5432 --strict -- /usr/local/bin/migrator
+    command: wait-for-it.sh db:5432 --strict -- migrator
     depends_on:
       - db
     expose:
