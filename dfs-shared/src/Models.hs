@@ -43,7 +43,7 @@ Node json
   deriving Show Generic
 
 File json
-  path String
+  path FilePath
   node NodeId
   UniquePath path
   deriving Show Generic

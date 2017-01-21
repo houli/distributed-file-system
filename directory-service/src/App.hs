@@ -16,7 +16,7 @@ import Servant.Client
 import AuthAPI (authAPIClient)
 import Config (Config(..))
 import DirectoryAPI (directoryAPIProxy, DirectoryAPI)
-import Models (runDB, File, Node)
+import Models (runDB, File(..), Node, Unique(..))
 
 type App = ReaderT Config Handler
 
@@ -40,8 +40,19 @@ ls maybeToken =
       allFiles <- runDB $ selectList [] []
       pure $ entityVal <$> allFiles
 
-whereis :: Maybe String -> App Node
-whereis = undefined
+whereis :: Maybe String -> FilePath -> App Node
+whereis maybeToken path =
+  case maybeToken of
+    Nothing -> throwError err401 { errBody = "No authentication token provided" }
+    Just token -> authenticate (Token $ pack token) $ do
+      maybeFile <- runDB $ getBy $ UniquePath path
+      case maybeFile of
+        Nothing -> throwError err404 -- File path does not exist
+        Just file -> do
+          maybeNode <- runDB . get . fileNode $ entityVal file
+          case maybeNode of
+            Nothing -> throwError err500 { errBody = "File node is no longer accessible" }
+            Just node -> pure node
 
 registerFileServer :: App NoContent
 registerFileServer = undefined
