@@ -20,18 +20,18 @@ import           System.Directory (doesFileExist)
 import           AuthAPI.Client (authAPIClient)
 import           Config (Config(..))
 import           FileAPI.API (fileAPIProxy, FileAPI, HTTPFile(..))
-import           Models
+import           Models (NodeId)
 
 type App = ReaderT Config Handler
 
 appToServer :: Config -> Server FileAPI
 appToServer cfg = enter (runReaderTNat cfg) server
 
-app :: ConnectionPool -> Int64 -> IO Application
-app pool serverId = do
+app :: ConnectionPool -> NodeId -> IO Application
+app pool nodeId = do
   manager <- newManager defaultManagerSettings
   authBase <- parseBaseUrl "http://auth-service:8080"
-  pure $ serve fileAPIProxy (appToServer $ Config pool serverId manager authBase)
+  pure $ serve fileAPIProxy (appToServer $ Config pool nodeId manager authBase)
 
 server :: ServerT FileAPI App
 server = readFileImpl :<|> writeFileImpl

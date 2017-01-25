@@ -3,15 +3,14 @@ module Config
   ) where
 
 import Database.Persist.Postgresql (ConnectionPool)
-import GHC.Int (Int64)
 import Network.HTTP.Client (Manager)
 import Servant.Client (BaseUrl)
 
-import Models (HasConnectionPool(..))
+import Models (HasConnectionPool(..), NodeId)
 
 data Config = Config
   { pool :: ConnectionPool
-  , serverId :: Int64
+  , nodeId :: NodeId
   , manager :: Manager
   , authBase :: BaseUrl
   }

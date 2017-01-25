@@ -38,8 +38,12 @@ executable file-service
                      , dfs-shared
                      , directory
                      , file-service
+                     , http-client
                      , monad-logger
+                     , mtl
                      , persistent-postgresql
+                     , servant-client
+                     , servant-server
                      , wai-extra
                      , warp
   default-language:    Haskell2010
