@@ -33,37 +33,32 @@ server :: ServerT DirectoryAPI App
 server = ls :<|> whereis :<|> registerFileServer
 
 ls :: Maybe String -> App [File]
-ls maybeToken =
-  case maybeToken of
-    Nothing -> throwError err401 { errBody = "No authentication token provided" }
-    Just token -> authenticate (Token $ pack token) $ do
-      allFiles <- runDB $ selectList [] []
-      pure $ entityVal <$> allFiles
+ls maybeToken = authenticate maybeToken $ do
+  allFiles <- runDB $ selectList [] []
+  pure $ entityVal <$> allFiles
 
 whereis :: Maybe String -> FilePath -> App Node
-whereis maybeToken path =
-  case maybeToken of
-    Nothing -> throwError err401 { errBody = "No authentication token provided" }
-    Just token -> authenticate (Token $ pack token) $ do
-      maybeFile <- runDB $ getBy $ UniquePath path
-      case maybeFile of
-        Nothing -> throwError err404 -- File path does not exist
-        Just file -> do
-          maybeNode <- runDB . get . fileNode $ entityVal file
-          case maybeNode of
-            Nothing -> throwError err500 { errBody = "File node is no longer accessible" }
-            Just node -> pure node
+whereis maybeToken path = authenticate maybeToken $ do
+  maybeFile <- runDB $ getBy $ UniquePath path
+  case maybeFile of
+    Nothing -> throwError err404 -- File path does not exist
+    Just file -> do
+      maybeNode <- runDB . get . fileNode $ entityVal file
+      case maybeNode of
+        Nothing -> throwError err500 { errBody = "File node is no longer accessible" }
+        Just node -> pure node
 
 registerFileServer :: App NoContent
 registerFileServer = undefined
 
 -- General authentication function, performs action only when succesfully authenticated
-authenticate :: Token -> App a -> App a
-authenticate token action = do
+authenticate :: Maybe String -> App a -> App a
+authenticate Nothing _ = throwError err401 { errBody = "No authentication token provided" }
+authenticate (Just token) action = do
   manager <- asks manager
   authBase <- asks authBase
-  res <- liftIO $ runExceptT $ verifyJWT token manager authBase
-  case res of
+  response <- liftIO $ runExceptT $ verifyJWT (Token $ pack token) manager authBase
+  case response of
     Left _ -> throwError err401 { errBody = "Invalid authentication token" }
     Right _ -> action
 
