@@ -8,11 +8,18 @@ module DirectoryAPI.API
 
 import Servant
 
-import Models (File, Node)
+import Models (File, Node, NodeId)
 
-type DirectoryAPI = "ls" :> Header "Authorization" String :> Get '[JSON] [File]
-               :<|> "whereis" :> Header "Authorization" String :> ReqBody '[JSON] FilePath :> Post '[JSON] Node
-               :<|> "registerFileServer" :> PostNoContent '[JSON] NoContent
+type DirectoryAPI = "ls" :> -- List all files
+                    Header "Authorization" String :> -- Auth token header
+                    Get '[JSON] [File] -- Listing of all files
+               :<|> "whereis" :> -- Lookup the node for a given file path
+                    Header "Authorization" String :> -- Auth token header
+                    ReqBody '[JSON] FilePath :> -- Path of file being looked up
+                    Post '[JSON] Node -- Node where the file is kept
+               :<|> "registerFileServer" :> -- Register a node with the directory service
+                    ReqBody '[JSON] Int :> -- Port file server node is running on
+                    Post '[JSON] NodeId -- Id of the newly created node record
 
 directoryAPIProxy :: Proxy DirectoryAPI
 directoryAPIProxy = Proxy

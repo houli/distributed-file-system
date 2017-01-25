@@ -15,8 +15,8 @@ import Servant.Client
 
 import AuthAPI.Client (authAPIClient)
 import Config (Config(..))
-import DirectoryAPI.API(directoryAPIProxy, DirectoryAPI)
-import Models (runDB, File(..), Node, Unique(..))
+import DirectoryAPI.API (directoryAPIProxy, DirectoryAPI)
+import Models (runDB, File(..), Node(..), NodeId, Unique(..))
 
 type App = ReaderT Config Handler
 
@@ -48,8 +48,12 @@ whereis maybeToken path = authenticate maybeToken $ do
         Nothing -> throwError err500 { errBody = "File node is no longer accessible" }
         Just node -> pure node
 
-registerFileServer :: App NoContent
-registerFileServer = undefined
+registerFileServer :: Int -> App NodeId
+registerFileServer port = do
+  newOrExistingNode <- runDB $ insertBy Node { nodePort = port }
+  case newOrExistingNode of
+    Left _ -> throwError err500 { errBody = "Node with that port already exists" }
+    Right newNode -> pure newNode
 
 -- General authentication function, performs action only when succesfully authenticated
 authenticate :: Maybe String -> App a -> App a
