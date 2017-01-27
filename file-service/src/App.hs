@@ -9,7 +9,7 @@ import           Control.Monad.Reader (asks, liftIO, ReaderT)
 import qualified Data.ByteString as BS
 import           Data.ByteString.Base64 (decodeLenient, encode)
 import           Data.ByteString.Char8 (pack, unpack)
-import           Database.Persist.Postgresql
+import           Database.Persist.Postgresql ((=.), upsert, ConnectionPool)
 import           GHC.Int (Int64)
 import           Network.HTTP.Client (defaultManagerSettings, newManager)
 import           Servant
@@ -20,7 +20,7 @@ import           System.Directory (doesFileExist)
 import           AuthAPI.Client (authAPIClient)
 import           Config (Config(..))
 import           FileAPI.API (fileAPIProxy, FileAPI, HTTPFile(..))
-import           Models (NodeId)
+import           Models (runDB, EntityField(..), File(..), NodeId)
 
 type App = ReaderT Config Handler
 
@@ -54,6 +54,8 @@ writeFileImpl maybeToken file = authenticate maybeToken $ do
   let filePath = basePath ++ path file
   let decodedContents = decodeLenient . pack $ contents file
   liftIO $ BS.writeFile filePath decodedContents
+  nodeId <- asks nodeId
+  runDB $ upsert (File filePath nodeId) [FileNode =. nodeId] -- Insert or update file record
   pure NoContent
 
 -- General authentication function, performs action only when succesfully authenticated

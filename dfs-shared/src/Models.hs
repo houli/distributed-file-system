@@ -13,6 +13,7 @@ module Models
   ( connStr
   , runDB
   , runMigrations
+  , EntityField(..)
   , File(..)
   , FileId
   , HasConnectionPool(..)
@@ -24,7 +25,7 @@ module Models
   ) where
 
 import Control.Monad.Reader (asks, MonadIO(..), MonadReader(..))
-import Database.Persist.Postgresql (runMigration, runSqlPool, ConnectionPool, ConnectionString, SqlPersistT, Unique)
+import Database.Persist.Postgresql (runMigration, runSqlPool, ConnectionPool, ConnectionString, EntityField, SqlPersistT, Unique)
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import GHC.Generics (Generic)
 import Servant.Auth.Server (FromJWT, ToJWT)
