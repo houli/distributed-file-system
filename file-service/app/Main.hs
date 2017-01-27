@@ -34,4 +34,4 @@ registerWithDirectoryService = do
     Right nodeId -> pure nodeId
 
 -- Pattern match out the file server registration endpoint
-_ :<|> _ :<|> registerFileServer = directoryAPIClient
+_ :<|> _ :<|> _ :<|> registerFileServer = directoryAPIClient
