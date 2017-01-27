@@ -18,7 +18,7 @@ services:
       - "8080:8080"
 
   file-service:
-    command: wait-for-it.sh migrator:8000 --strict -- file-service
+    command: wait-for-it.sh directory-service:8080 --strict -- file-service
     depends_on:
       - auth-service
       - db
