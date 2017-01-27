@@ -13,12 +13,14 @@ import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics (Generic)
 import Servant
 
+import AuthAPI.API (AuthToken)
+
 type FileAPI = "readFile" :> -- Endpoint to read from a file on a node
-               Header "Authorization" String :> -- Auth token header
+               AuthToken :>
                ReqBody '[JSON] FilePath :> -- File path being read
                Get '[JSON] HTTPFile -- base64 encoded file contents
           :<|> "writeFile" :> -- Endpoint to write to a file on a node
-               Header "Authorization" String :> -- Auth token header
+               AuthToken :>
                ReqBody '[JSON] HTTPFile :> -- Path and base64 encoded file contents
                PostNoContent '[JSON] NoContent -- No content, no error status signifies success
 

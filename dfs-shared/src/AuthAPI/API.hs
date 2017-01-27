@@ -6,6 +6,7 @@
 module AuthAPI.API
   ( authAPIProxy
   , AuthAPI
+  , AuthToken
   , UserCreationResponse(..)
   ) where
 
@@ -22,6 +23,9 @@ import Models (User)
 type AuthAPI auths = "register" :> ReqBody '[JSON] User :> Post '[JSON] (Headers '[Header "Token" ByteString] UserCreationResponse)
                 :<|> "login" :> ReqBody '[JSON] User :> PostNoContent '[JSON] (Headers '[Header "Token" ByteString] NoContent)
                 :<|> Auth auths User :> "verifyJWT" :> Get '[JSON] NoContent
+
+-- Common auth token header combinator
+type AuthToken = Header "Authorization" String
 
 newtype UserCreationResponse = UserCreationResponse
   { userId :: Int64 } deriving (Generic, FromJSON, ToJSON)
