@@ -28,7 +28,6 @@ registerWithDirectoryService :: IO NodeId
 registerWithDirectoryService = do
   manager <- newManager defaultManagerSettings
   baseUrl <- parseBaseUrl "http://directory-service:8080"
-  undefined
   response <- runExceptT $ registerFileServer 8081 manager baseUrl
   case response of
     Left _ -> error "Unable to register with directory service"
