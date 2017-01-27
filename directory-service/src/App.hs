@@ -7,16 +7,18 @@ module App
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (asks, liftIO, ReaderT)
 import Data.ByteString.Char8 (pack)
-import Database.Persist.Postgresql
+import Data.Time.Clock (getCurrentTime)
+import Database.Persist.Postgresql ((=.), entityKey, entityVal, get, getBy, insertBy,
+                                    selectFirst, selectList, updateGet, ConnectionPool, SelectOpt(..))
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 import Servant
 import Servant.Auth.Client (Token(..))
-import Servant.Client
+import Servant.Client (parseBaseUrl)
 
 import AuthAPI.Client (authAPIClient)
 import Config (Config(..))
 import DirectoryAPI.API (directoryAPIProxy, DirectoryAPI)
-import Models (runDB, File(..), Node(..), NodeId, Unique(..))
+import Models (runDB, EntityField(..), File(..), Node(..), NodeId, Unique(..))
 
 type App = ReaderT Config Handler
 
@@ -30,7 +32,7 @@ app pool = do
   pure $ serve directoryAPIProxy (appToServer $ Config pool manager authBase)
 
 server :: ServerT DirectoryAPI App
-server = ls :<|> whereis :<|> registerFileServer
+server = ls :<|> whereis :<|> roundRobinNode :<|> registerFileServer
 
 ls :: Maybe String -> App [File]
 ls maybeToken = authenticate maybeToken $
@@ -47,9 +49,20 @@ whereis maybeToken path = authenticate maybeToken $ do
         Nothing -> throwError err500 { errBody = "File node is no longer accessible" }
         Just node -> pure node
 
+roundRobinNode :: Maybe String -> App Node
+roundRobinNode maybeToken = authenticate maybeToken $ do
+  maybeLeastRecentNode <- runDB $ selectFirst [] [Asc NodeStoredAt] -- Sort nodes by date ascending to find LRU
+  case maybeLeastRecentNode of
+    Nothing -> throwError err500 { errBody = "No nodes registered with directory service" }
+    Just leastRecentNode -> do
+      currentTime <- liftIO getCurrentTime
+      updatedNode <- runDB $ updateGet (entityKey leastRecentNode) [NodeStoredAt =. currentTime]
+      pure $ entityVal leastRecentNode
+
 registerFileServer :: Int -> App NodeId
 registerFileServer port = do
-  newOrExistingNode <- runDB $ insertBy Node { nodePort = port }
+  currentTime <- liftIO getCurrentTime
+  newOrExistingNode <- runDB $ insertBy Node { nodePort = port, nodeStoredAt = currentTime }
   case newOrExistingNode of
     Left _ -> throwError err500 { errBody = "Node with that port already exists" }
     Right newNode -> pure newNode

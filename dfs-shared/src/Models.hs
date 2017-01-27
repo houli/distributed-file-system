@@ -25,6 +25,7 @@ module Models
   ) where
 
 import Control.Monad.Reader (asks, MonadIO(..), MonadReader(..))
+import Data.Time.Clock (UTCTime)
 import Database.Persist.Postgresql (runMigration, runSqlPool, ConnectionPool, ConnectionString, EntityField, SqlPersistT, Unique)
 import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSettings)
 import GHC.Generics (Generic)
@@ -40,6 +41,7 @@ User json
 
 Node json
   port Int
+  storedAt UTCTime default=now()
   UniquePort port
   deriving Show Generic
 
