@@ -33,9 +33,8 @@ server :: ServerT DirectoryAPI App
 server = ls :<|> whereis :<|> registerFileServer
 
 ls :: Maybe String -> App [File]
-ls maybeToken = authenticate maybeToken $ do
-  allFiles <- runDB $ selectList [] []
-  pure $ entityVal <$> allFiles
+ls maybeToken = authenticate maybeToken $
+  (entityVal <$>) <$> runDB (selectList [] [])
 
 whereis :: Maybe String -> FilePath -> App Node
 whereis maybeToken path = authenticate maybeToken $ do
