@@ -81,8 +81,8 @@ doReplicateRequest manager file = liftIO $ do
   pure ()
   where pick xs = (xs !!) <$> randomRIO (0, length xs - 1)
         servers = [ (8081, "http://file-service1:8080")
-                  , (8083, "http://file-service2:8080")
-                  , (8084, "http://file-service3:8080")
+                  , (8082, "http://file-service2:8080")
+                  , (8083, "http://file-service3:8080")
                   ]
 
 replicateImpl :: HTTPFile -> App NoContent

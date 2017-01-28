@@ -1,11 +1,12 @@
 version: '2'
 
+networks:
+  file-services:
+
 services:
   db:
     environment:
       POSTGRES_DB: dfs
-    expose:
-      - 5432
     image: postgres:9.6.1-alpine
 
   auth-service:
@@ -17,7 +18,7 @@ services:
     ports:
       - "8080:8080"
 
-  file-service:
+  file-service1:
     command: wait-for-it.sh directory-service:8080 --strict -- file-service
     depends_on:
       - auth-service
@@ -27,8 +28,43 @@ services:
     image: houli/file-service
     environment:
       EXPOSED_PORT: 8081
+    networks:
+      - default
+      - file-services
     ports:
       - "8081:8080"
+
+  file-service2:
+    command: wait-for-it.sh directory-service:8080 --strict -- file-service
+    depends_on:
+      - auth-service
+      - db
+      - directory-service
+      - migrator
+    image: houli/file-service
+    environment:
+      EXPOSED_PORT: 8082
+    networks:
+      - default
+      - file-services
+    ports:
+      - "8082:8080"
+
+  file-service3:
+    command: wait-for-it.sh directory-service:8080 --strict -- file-service
+    depends_on:
+      - auth-service
+      - db
+      - directory-service
+      - migrator
+    image: houli/file-service
+    environment:
+      EXPOSED_PORT: 8083
+    networks:
+      - default
+      - file-services
+    ports:
+      - "8083:8080"
 
   directory-service:
     command: wait-for-it.sh migrator:8000 --strict -- directory-service
@@ -38,7 +74,7 @@ services:
       - migrator
     image: houli/directory-service
     ports:
-      - "8082:8080"
+      - "8084:8080"
 
   migrator:
     command: wait-for-it.sh db:5432 --strict -- migrator
