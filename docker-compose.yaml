@@ -25,6 +25,8 @@ services:
       - directory-service
       - migrator
     image: houli/file-service
+    environment:
+      EXPOSED_PORT: 8081
     ports:
       - "8081:8080"
 

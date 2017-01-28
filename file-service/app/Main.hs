@@ -9,6 +9,7 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Servant
 import Servant.Client (parseBaseUrl)
 import System.Directory (createDirectoryIfMissing)
+import System.Environment (getEnv)
 
 import App (app)
 import DirectoryAPI.Client (directoryAPIClient)
@@ -23,12 +24,12 @@ main = do
   run 8080 $ logStdoutDev application
 
 -- Registers a file server node with the directory service
--- TODO: Get exposed port from environment
 registerWithDirectoryService :: IO NodeId
 registerWithDirectoryService = do
+  exposedPort <- getEnv "EXPOSED_PORT"
   manager <- newManager defaultManagerSettings
   baseUrl <- parseBaseUrl "http://directory-service:8080"
-  response <- runExceptT $ registerFileServer 8081 manager baseUrl
+  response <- runExceptT $ registerFileServer (read exposedPort) manager baseUrl
   case response of
     Left _ -> error "Unable to register with directory service"
     Right nodeId -> pure nodeId
