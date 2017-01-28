@@ -4,23 +4,26 @@ module App
   ( app
   ) where
 
+import           Control.Concurrent (forkIO)
 import           Control.Monad.Except (runExceptT)
-import           Control.Monad.Reader (asks, liftIO, ReaderT)
+import           Control.Monad.Reader (asks, liftIO, MonadIO, ReaderT)
 import qualified Data.ByteString as BS
 import           Data.ByteString.Base64 (decodeLenient, encode)
 import           Data.ByteString.Char8 (pack, unpack)
-import           Database.Persist.Postgresql ((=.), upsert, ConnectionPool)
-import           GHC.Int (Int64)
-import           Network.HTTP.Client (defaultManagerSettings, newManager)
+import           Database.Persist.Postgresql ((=.), entityVal, getBy, insert, ConnectionPool)
+import           Network.HTTP.Client (defaultManagerSettings, newManager, Manager)
 import           Servant
 import           Servant.Auth.Client (Token(..))
 import           Servant.Client (parseBaseUrl)
 import           System.Directory (doesFileExist)
+import           System.Environment (getEnv)
+import           System.Random (randomRIO)
 
 import           AuthAPI.Client (authAPIClient)
 import           Config (Config(..))
 import           FileAPI.API (fileAPIProxy, FileAPI, HTTPFile(..))
-import           Models (runDB, EntityField(..), File(..), NodeId)
+import           FileAPI.Client (fileAPIClient)
+import           Models (runDB, EntityField(..), File(..), NodeId, Unique(..))
 
 type App = ReaderT Config Handler
 
@@ -34,7 +37,7 @@ app pool nodeId = do
   pure $ serve fileAPIProxy (appToServer $ Config pool nodeId manager authBase)
 
 server :: ServerT FileAPI App
-server = readFileImpl :<|> writeFileImpl
+server = readFileImpl :<|> writeFileImpl :<|> replicateImpl
 
 basePath :: FilePath
 basePath = "/data/files/"
@@ -51,12 +54,45 @@ readFileImpl maybeToken path = authenticate maybeToken $ do
 
 writeFileImpl :: Maybe String -> HTTPFile -> App NoContent
 writeFileImpl maybeToken file = authenticate maybeToken $ do
+  nodeId <- asks nodeId
+  maybeFile <- runDB $ getBy $ UniquePath (path file) -- See if file exists already
+  case maybeFile of
+    Nothing -> do
+      runDB $ insert (File (path file) nodeId) -- Doesn't exist, create it and write to disk
+      writeAndReplicate file
+    Just dbFile ->
+      if fileNode (entityVal dbFile) == nodeId -- Check if locked by another primary
+      then writeAndReplicate file -- Not locked on another primary, can write
+      else throwError err500 { errBody = "File is locked to another primary node" }
+
+writeAndReplicate :: HTTPFile -> App NoContent
+writeAndReplicate file = do
+    writeToDisk file
+    manager <- asks manager
+    liftIO $ forkIO $ doReplicateRequest manager file -- Run replicate request asynchronously in another thread
+    pure NoContent
+
+doReplicateRequest :: MonadIO m => Manager -> HTTPFile -> m ()
+doReplicateRequest manager file = liftIO $ do
+  exposedPort <- read <$> getEnv "EXPOSED_PORT"
+  server <- snd <$> pick (filter ((exposedPort /=) . fst) servers) -- Pick a random server other than this one
+  fsBase <- parseBaseUrl server
+  runExceptT $ replicateClient file manager fsBase -- Send replication request to the other node
+  pure ()
+  where pick xs = (xs !!) <$> randomRIO (0, length xs - 1)
+        servers = [ (8081, "http://file-service1:8080")
+                  , (8083, "http://file-service2:8080")
+                  , (8084, "http://file-service3:8080")
+                  ]
+
+replicateImpl :: HTTPFile -> App NoContent
+replicateImpl file = writeToDisk file >> pure NoContent
+
+writeToDisk :: MonadIO m => HTTPFile -> m ()
+writeToDisk file = do
   let filePath = basePath ++ path file
   let decodedContents = decodeLenient . pack $ contents file
   liftIO $ BS.writeFile filePath decodedContents
-  nodeId <- asks nodeId
-  runDB $ upsert (File filePath nodeId) [FileNode =. nodeId] -- Insert or update file record
-  pure NoContent
 
 -- General authentication function, performs action only when succesfully authenticated
 authenticate :: Maybe String -> App a -> App a
@@ -71,3 +107,6 @@ authenticate (Just token) action = do
 
 -- Pattern match out the routes of the AuthAPI
 _ :<|> _ :<|> verifyJWT = authAPIClient
+
+-- Pattern match out the routes of the FileAPI
+_ :<|> _ :<|> replicateClient = fileAPIClient

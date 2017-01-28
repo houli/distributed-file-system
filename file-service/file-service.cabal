@@ -25,6 +25,7 @@ library
                      , http-client
                      , mtl
                      , persistent-postgresql
+                     , random
                      , servant-auth-client
                      , servant-client
                      , servant-server
