@@ -10,7 +10,7 @@ import           Control.Monad.Reader (asks, liftIO, MonadIO, ReaderT)
 import qualified Data.ByteString as BS
 import           Data.ByteString.Base64 (decodeLenient, encode)
 import           Data.ByteString.Char8 (pack, unpack)
-import           Database.Persist.Postgresql ((=.), entityVal, getBy, insert, ConnectionPool)
+import           Database.Persist.Postgresql ((=.), entityKey, entityVal, getBy, insert, update, ConnectionPool)
 import           Network.HTTP.Client (defaultManagerSettings, newManager, Manager)
 import           Servant
 import           Servant.Auth.Client (Token(..))
@@ -56,13 +56,17 @@ writeFileImpl :: Maybe String -> HTTPFile -> App NoContent
 writeFileImpl maybeToken file = authenticate maybeToken $ do
   nodeId <- asks nodeId
   maybeFile <- runDB $ getBy $ UniquePath (path file) -- See if file exists already
+  let size = BS.length . decodeLenient . pack $ contents file
   case maybeFile of
     Nothing -> do
-      runDB $ insert (File (path file) nodeId) -- Doesn't exist, create it and write to disk
+      let dbFile = File { filePath = path file, fileNode = nodeId, fileSize = size }
+      runDB $ insert dbFile -- Doesn't exist, create it and write to disk
       writeAndReplicate file
     Just dbFile ->
       if fileNode (entityVal dbFile) == nodeId -- Check if locked by another primary
-      then writeAndReplicate file -- Not locked on another primary, can write
+      then do
+        runDB $ update (entityKey dbFile) [FileSize =. size]
+        writeAndReplicate file -- Not locked on another primary, can write
       else throwError err500 { errBody = "File is locked to another primary node" }
 
 writeAndReplicate :: HTTPFile -> App NoContent

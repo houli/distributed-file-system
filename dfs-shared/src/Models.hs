@@ -48,6 +48,7 @@ Node json
 File json
   path FilePath
   node NodeId
+  size Int
   UniquePath path
   deriving Show Generic
 |]
