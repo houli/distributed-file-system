@@ -14,7 +14,7 @@ import           Models (connStr)
 main :: IO ()
 main = do
   pool <- runStdoutLoggingT $ createPostgresqlPool connStr 5
-  jwkContents <- BS.readFile "/data/secrets/jwk.json"
+  jwkContents <- BS.readFile "/data/secrets/jwk.json" -- Read our key contents
   case decodeStrict jwkContents of
     Nothing -> error "Unable to decode JWK"
     Just jwk -> run 8080 $ logStdoutDev $ app (defaultJWTSettings jwk) pool

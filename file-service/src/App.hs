@@ -25,6 +25,7 @@ import           FileAPI.API (fileAPIProxy, FileAPI, HTTPFile(..))
 import           FileAPI.Client (fileAPIClient)
 import           Models (runDB, EntityField(..), File(..), NodeId, Unique(..))
 
+-- Type alias custom monad to handle passing our configuration around
 type App = ReaderT Config Handler
 
 appToServer :: Config -> Server FileAPI
@@ -39,6 +40,7 @@ app pool nodeId = do
 server :: ServerT FileAPI App
 server = readFileImpl :<|> writeFileImpl :<|> replicateImpl
 
+-- Where files will be stored on the container
 basePath :: FilePath
 basePath = "/data/files/"
 
@@ -90,7 +92,7 @@ doReplicateRequest manager file = liftIO $ do
                   ]
 
 replicateImpl :: HTTPFile -> App NoContent
-replicateImpl file = writeToDisk file >> pure NoContent
+replicateImpl file = writeToDisk file *> pure NoContent
 
 writeToDisk :: MonadIO m => HTTPFile -> m ()
 writeToDisk file = do

@@ -29,6 +29,7 @@ type FileAPI = "readFile" :> -- Endpoint to read from a file on a node
                ReqBody '[JSON] HTTPFile :> -- Path and base64 encoded contents of file to be replicated
                PostNoContent '[JSON] NoContent -- No content but no error HTTP status signifies success
 
+-- Type representing uploaded files and read files
 data HTTPFile = HTTPFile
   { path :: FilePath
   , contents :: String

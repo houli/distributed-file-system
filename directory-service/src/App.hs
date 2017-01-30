@@ -20,6 +20,7 @@ import Config (Config(..))
 import DirectoryAPI.API (directoryAPIProxy, DirectoryAPI)
 import Models (runDB, EntityField(..), File(..), Node(..), NodeId, Unique(..))
 
+-- Type alias custom monad to handle passing our configuration around
 type App = ReaderT Config Handler
 
 appToServer :: Config -> Server DirectoryAPI
@@ -34,6 +35,7 @@ app pool = do
 server :: ServerT DirectoryAPI App
 server = ls :<|> whereis :<|> roundRobinNode :<|> registerFileServer
 
+-- Return all file records from the database
 ls :: Maybe String -> App [File]
 ls maybeToken = authenticate maybeToken $
   (entityVal <$>) <$> runDB (selectList [] [])
@@ -61,7 +63,7 @@ roundRobinNode maybeToken = authenticate maybeToken $ do
 
 registerFileServer :: Int -> App NodeId
 registerFileServer port = do
-  currentTime <- liftIO getCurrentTime
+  currentTime <- liftIO getCurrentTime -- Node last stored at time, default current time
   newOrExistingNode <- runDB $ insertBy Node { nodePort = port, nodeStoredAt = currentTime }
   case newOrExistingNode of
     Left existingNode -> pure $ entityKey existingNode
@@ -73,7 +75,7 @@ authenticate Nothing _ = throwError err401 { errBody = "No authentication token 
 authenticate (Just token) action = do
   manager <- asks manager
   authBase <- asks authBase
-  response <- liftIO $ runExceptT $ verifyJWT (Token $ pack token) manager authBase
+  response <- liftIO $ runExceptT $ verifyJWT (Token $ pack token) manager authBase -- Verify token
   case response of
     Left _ -> throwError err401 { errBody = "Invalid authentication token" }
     Right _ -> action

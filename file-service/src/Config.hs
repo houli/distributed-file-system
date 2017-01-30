@@ -8,6 +8,7 @@ import Servant.Client (BaseUrl)
 
 import Models (HasConnectionPool(..), NodeId)
 
+-- Type used to pass around shared configuration necessary to run this service
 data Config = Config
   { pool :: ConnectionPool
   , nodeId :: NodeId
@@ -15,5 +16,6 @@ data Config = Config
   , authBase :: BaseUrl
   }
 
+-- Allow our runDB function to pull the DB pool from our config
 instance HasConnectionPool Config where
   connectionPool = pool

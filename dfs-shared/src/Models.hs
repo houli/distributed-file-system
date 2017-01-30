@@ -31,7 +31,7 @@ import Database.Persist.TH (mkMigrate, mkPersist, persistLowerCase, share, sqlSe
 import GHC.Generics (Generic)
 import Servant.Auth.Server (FromJWT, ToJWT)
 
--- Declare shared data models
+-- Declare shared database models
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
   username String
@@ -57,19 +57,23 @@ File json
 instance ToJWT User
 instance FromJWT User
 
-runMigrations :: SqlPersistT IO ()
-runMigrations = runMigration migrateAll
-
+-- The class of types that can give you a database pool
 class HasConnectionPool a where
   connectionPool :: a -> ConnectionPool
 
 instance HasConnectionPool ConnectionPool where
   connectionPool = id
 
+-- Run an arbitrary persistent query using a pool of database connections
 runDB :: HasConnectionPool a => (MonadReader a m, MonadIO m) => SqlPersistT IO b -> m b
 runDB query = do
   pool <- asks connectionPool
   liftIO $ runSqlPool query pool
 
+-- All of our shared data model migrations
+runMigrations :: SqlPersistT IO ()
+runMigrations = runMigration migrateAll
+
+-- The database connection string of our postgres container
 connStr :: ConnectionString
 connStr = "host=db port=5432 dbname=dfs user=postgres"

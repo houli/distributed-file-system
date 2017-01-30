@@ -38,21 +38,23 @@ register jwts user = do
   case newOrExistingUser of
     Left _ -> throwError err500 { errBody = "Username already taken" }
     Right newUser -> do
-      jwt <- createToken 60 user jwts
+      jwt <- createToken 60 user jwts -- 1 hour expiry token
       pure $ addHeader jwt UserCreationResponse { userId = fromSqlKey newUser }
 
+-- Log a user in and give them their auth token
 login :: JWTSettings -> User -> App (Headers '[Header "Token" ByteString] NoContent)
 login jwts login = do
   maybeUser <- runDB $ getBy $ UniqueUsername (userUsername login)
   case maybeUser of
     Nothing -> loginError -- Username doesn't exist
-    Just user -> if verifyPassword (pack $ userPassword login) (pack $ userPassword $ entityVal user)
+    Just user -> if verifyPassword (pack $ userPassword login) (pack $ userPassword $ entityVal user) -- Ensure hashed password matches
                  then do
-                   jwt <- createToken 60 login jwts
+                   jwt <- createToken 60 login jwts -- 1 hour expiry token
                    pure $ addHeader jwt NoContent
                  else loginError -- Incorrect password
   where loginError = throwError err401 { errBody = "Incorrect username or password" }
 
+-- Create a JWT token with X minutes expiry time
 createToken :: NominalDiffTime -> User -> JWTSettings -> App ByteString
 createToken expiryMinutes user jwts = do
   time <- liftIO getCurrentTime
@@ -62,6 +64,7 @@ createToken expiryMinutes user jwts = do
     Left _ -> throwError err500 { errBody = "Unable to create JWT" }
     Right jwt -> pure jwt
 
+-- Ensure that a token is valid and signed by our server
 verifyJWT :: AuthResult User -> App NoContent
 verifyJWT (Authenticated _) = pure NoContent
 verifyJWT _ = throwError err401
