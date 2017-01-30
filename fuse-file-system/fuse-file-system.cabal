@@ -1,0 +1,43 @@
+name:                fuse-file-system
+version:             0.1.0.0
+synopsis:            Initial project template from stack
+description:         Please see README.org
+homepage:            https://github.com/houli/distributed-file-system#readme
+license:             MIT
+license-file:        LICENSE
+author:              Eoin Houlihan
+maintainer:          ehoulih@tcd.ie
+copyright:           2017 Eoin Houlihan
+category:            Web
+build-type:          Simple
+extra-source-files:  README.org
+cabal-version:       >=1.10
+
+executable dfs-fuse
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , base64-bytestring
+                     , bytestring
+                     , dfs-shared
+                     , HFuse
+                     , http-client
+                     , mtl
+                     , servant-client
+                     , servant-server
+                     , unix
+  default-language:    Haskell2010
+
+test-suite fuse-file-system-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , fuse-file-system
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/houli/distributed-file-system
