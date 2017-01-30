@@ -14,13 +14,16 @@ import Models (File, Node, NodeId)
 type DirectoryAPI = "ls" :> -- List all files
                     AuthToken :>
                     Get '[JSON] [File] -- Listing of all files
+
                :<|> "whereis" :> -- Lookup the node for a given file path
                     AuthToken :>
                     ReqBody '[JSON] FilePath :> -- Path of file being looked up
                     Post '[JSON] Node -- Node where the file is kept
+
                :<|> "roundRobinNode" :> -- Next node to use as a file primary
                     AuthToken :>
                     Get '[JSON] Node
+
                :<|> "registerFileServer" :> -- Register a node with the directory service
                     ReqBody '[JSON] Int :> -- Port file server node is running on
                     Post '[JSON] NodeId -- Id of the newly created node record
