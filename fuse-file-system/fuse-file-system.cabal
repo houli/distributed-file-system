@@ -16,6 +16,8 @@ cabal-version:       >=1.10
 executable dfs-fuse
   hs-source-dirs:      app
   main-is:             Main.hs
+  other-modules:       Config
+                     , FUSEOps
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , base64-bytestring
