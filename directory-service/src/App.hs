@@ -40,7 +40,7 @@ ls maybeToken = authenticate maybeToken $
 
 whereis :: Maybe String -> FilePath -> App Node
 whereis maybeToken path = authenticate maybeToken $ do
-  maybeFile <- runDB $ getBy $ UniquePath (removeSlash path)
+  maybeFile <- runDB $ getBy $ UniquePath $ filter ('/' /=) path
   case maybeFile of
     Nothing -> throwError err404 -- File path does not exist
     Just file -> do
@@ -48,9 +48,6 @@ whereis maybeToken path = authenticate maybeToken $ do
       case maybeNode of
         Nothing -> throwError err500 { errBody = "File node is no longer accessible" }
         Just node -> pure node
-  where removeSlash "" = ""
-        removeSlash ('/' : cs) = removeSlash cs
-        removeSlash (c : cs) = c : removeSlash cs
 
 roundRobinNode :: Maybe String -> App Node
 roundRobinNode maybeToken = authenticate maybeToken $ do
