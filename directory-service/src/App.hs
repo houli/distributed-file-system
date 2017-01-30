@@ -64,7 +64,7 @@ registerFileServer port = do
   currentTime <- liftIO getCurrentTime
   newOrExistingNode <- runDB $ insertBy Node { nodePort = port, nodeStoredAt = currentTime }
   case newOrExistingNode of
-    Left _ -> throwError err500 { errBody = "Node with that port already exists" }
+    Left existingNode -> pure $ entityKey existingNode
     Right newNode -> pure newNode
 
 -- General authentication function, performs action only when succesfully authenticated
