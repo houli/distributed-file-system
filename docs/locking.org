@@ -1,1 +1,18 @@
 * Locking Scheme
+The locking scheme was implemented as a per-node locking system. This meant that
+if a file was to be edited it could only occur on a single node and then that
+update would be propagated to other replica nodes.
+
+For example, if a file ~hello.txt~ already existed, the directory service would
+indicate this and direct the client to the correct node. In this way, clients
+would know where they needed to go to get a lock on the file and write to it.
+This prevents multiple clients from attempting to write to a single file across
+multiple nodes.
+
+There are drawbacks to this approach however. The locks provided by this system
+are quite coarse and occur at the node level rather than on particular actions
+on a file such as reads and writes. A more fine-grained system would allow
+multiple locks such as a read lock and a write lock across multiple nodes for a
+single file. The benefit provided by the taken approach are the simplicity of
+implementation and the ease of understanding for those implementing clients to interact
+with the distributed file system.
