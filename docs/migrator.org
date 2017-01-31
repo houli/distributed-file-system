@@ -1,0 +1,31 @@
+* Migrator Service
+As outlined earlier, my system architecture includes a Postgresql database. This
+database is responsible for keeping track of shared data models between the
+different services that are running. As such, it needs to be in a consistent
+state when our services start up to avoid errors.
+
+One of the problems I initially faced was that all services required this
+database consistency to operate properly. If the database migrations had yet to
+be run when services started up they could potentially crash due to tables not
+existing or not being properly updated to match the current version of the
+database schema. To solve this, I introduced the migrator service. The migrator
+service handles running migrations on our Postgresql database and ensuring that
+it completes successfully before any other dependent service such as the
+authentication service or directory service starts up.
+
+This is done by making use of the dependency mechanism of Docker Compose. First,
+our migrator starts up and waits for our database to become accessible over the
+network. Once the database comes online, our migrator service is free to update
+the database and make it consistent with our schema. It then runs a TCP server
+responding to all requests indefinitely. This is what allows the dependent
+services know that our migrations have been completed and that the database has
+reached a consistent state. These dependent services are now free to start up
+and handle HTTP requests.
+
+This is a very simple design but has a number of benefits. If our migrator
+service ever disappears we cannot assume that our database is in a consistent
+state and our other dependent services will fail to start. If our migrator
+crashes again we cannot assume the above. In this design any failure to reach
+the migrator service will automatically cause the failure of services that rely
+on the database and they will never start running against a potentially
+incorrect schema of the database.
