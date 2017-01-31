@@ -20,22 +20,29 @@ _ :<|> authLogin :<|> _ = authAPIClient
 authService :: IO BaseUrl
 authService = parseBaseUrl "http://localhost:8080"
 
-login :: User -> Manager -> IO String
+login :: User -> Manager -> IO (Maybe String)
 login user manager = do
   authBase <- authService
   loginResponse <- runExceptT $ authLogin user manager authBase
   case loginResponse of
-    Left _ -> error "Failed to login"
-    Right success -> pure $ head $ map (BS.unpack . snd) (getHeaders success)
+    Left _ -> pure Nothing
+    Right success -> pure $ Just $ head $ map (BS.unpack . snd) (getHeaders success)
 
 main :: IO ()
 main = do
-  username <- putStr "Username: " *> hFlush stdout *> getLine
-  password <- putStr "Password: " *> hFlush stdout *> withEcho False getLine <* putChar '\n' -- Don't display password characters
   manager <- newManager defaultManagerSettings
-  token <- login (User username password) manager
+  token <- loginLoop manager
   putStrLn "Mounting distributed file system"
   fuseMain (dfsOps (Config manager token)) defaultExceptionHandler
+
+loginLoop :: Manager -> IO String
+loginLoop manager = do
+    username <- putStr "Username: " *> hFlush stdout *> getLine
+    password <- putStr "Password: " *> hFlush stdout *> withEcho False getLine <* putChar '\n' -- Don't display password characters
+    maybeToken <- login (User username password) manager
+    case maybeToken of
+      Nothing -> putStrLn "Incorrect login details" *> loginLoop manager
+      Just token -> pure token
 
 -- Run action with echoing on or off
 withEcho :: Bool -> IO a -> IO a
