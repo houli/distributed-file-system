@@ -34,6 +34,7 @@ main = do
   password <- putStr "Password: " *> hFlush stdout *> withEcho False getLine <* putChar '\n' -- Don't display password characters
   manager <- newManager defaultManagerSettings
   token <- login (User username password) manager
+  putStrLn "Mounting distributed file system"
   fuseMain (dfsOps (Config manager token)) defaultExceptionHandler
 
 -- Run action with echoing on or off

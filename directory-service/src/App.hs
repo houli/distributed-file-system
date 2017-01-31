@@ -40,26 +40,42 @@ ls :: Maybe String -> App [File]
 ls maybeToken = authenticate maybeToken $
   (entityVal <$>) <$> runDB (selectList [] [])
 
+findFile :: FilePath -> App (Maybe File)
+findFile path = do
+  maybeFile <- runDB $ getBy $ UniquePath path
+  case maybeFile of
+    Nothing -> pure Nothing
+    Just file -> pure $ Just $ entityVal file
+
+-- Return the primary node that the file is stored on
 whereis :: Maybe String -> FilePath -> App Node
 whereis maybeToken path = authenticate maybeToken $ do
-  maybeFile <- runDB $ getBy $ UniquePath $ filter ('/' /=) path
+  maybeFile <- findFile path
   case maybeFile of
     Nothing -> throwError err404 -- File path does not exist
     Just file -> do
-      maybeNode <- runDB . get . fileNode $ entityVal file
+      maybeNode <- runDB . get . fileNode $ file
       case maybeNode of
         Nothing -> throwError err500 { errBody = "File node is no longer accessible" }
         Just node -> pure node
 
-roundRobinNode :: Maybe String -> App Node
-roundRobinNode maybeToken = authenticate maybeToken $ do
-  maybeLeastRecentNode <- runDB $ selectFirst [] [Asc NodeStoredAt] -- Sort nodes by date ascending to find LRU
-  case maybeLeastRecentNode of
-    Nothing -> throwError err500 { errBody = "No nodes registered with directory service" }
-    Just leastRecentNode -> do
-      currentTime <- liftIO getCurrentTime
-      updatedNode <- runDB $ updateGet (entityKey leastRecentNode) [NodeStoredAt =. currentTime]
-      pure $ entityVal leastRecentNode
+-- Primary node that the file is stored on or the next round robin primary
+roundRobinNode :: Maybe String -> FilePath -> App Node
+roundRobinNode maybeToken path = authenticate maybeToken $ do
+  maybeFile <- findFile path
+  case maybeFile of
+    Nothing -> do
+      maybeLeastRecentNode <- runDB $ selectFirst [] [Asc NodeStoredAt] -- Sort nodes by date ascending to find LRU
+      case maybeLeastRecentNode of
+        Nothing -> throwError err500 { errBody = "No nodes registered with directory service" }
+        Just leastRecentNode -> do
+          currentTime <- liftIO getCurrentTime
+          runDB $ updateGet (entityKey leastRecentNode) [NodeStoredAt =. currentTime]
+    Just file -> do
+      maybeNode <- runDB $ get (fileNode file)
+      case maybeNode of
+        Nothing -> throwError err500 { errBody = "File found but no node found" }
+        Just node -> pure node
 
 registerFileServer :: Int -> App NodeId
 registerFileServer port = do

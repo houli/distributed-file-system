@@ -22,7 +22,8 @@ type DirectoryAPI = "ls" :> -- List all files
 
                :<|> "roundRobinNode" :> -- Next node to use as a file primary
                     AuthToken :>
-                    Get '[JSON] Node
+                    ReqBody '[JSON] FilePath :> -- Path of file that will be written
+                    Get '[JSON] Node -- Primary node of the file being stored
 
                :<|> "registerFileServer" :> -- Register a node with the directory service
                     ReqBody '[JSON] Int :> -- Port file server node is running on
