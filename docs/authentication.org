@@ -1,1 +1,49 @@
 * Authentication Service and Users
+** Overview
+The authentication service was the first service designed and implemented. It
+serves as a gateway for other services to verify that a user has the correct
+authentication and permissions to perform an action in the system. For example,
+we may want to ensure that a user is logged in and has access to a particular
+file before we service any request for that user to read or write that file. A
+failure to log in or lack of permissions means that the authentication service
+should deny that particular request.
+
+** Endpoints
+Three endpoints have been provided as part of the implementation of this
+service. The first is a registration endpoint that allows a user to create a new
+account on the system. Users who create accounts are automatically authenticated
+and given their authentication token. The second endpoint allows users to log in
+to the system using pre-existing account credentials and gives back their
+authentication token if they provide the correct details. The final endpoint
+allows other services in the system to verify the authenticity of a users token
+to ensure they have the correct access to perform actions such as listing files
+or reading and writing files.
+
+** PBKDF1 Salting and Hashing Algorithm
+Secure storage of user credentials is a vital part of any secure system.
+Fortunately, the Haskell ecosystem provides many strong cryptographic libraries
+for handling information that needs to be stored securely. The library used by
+the authentication service to store passwords is [[https://hackage.haskell.org/package/pwstore-fast][~pwstore-fast~]].
+
+To encrypt user passwords the default PBKDF1 algorithm is used with the
+recommended strength of 17. PBKDF1 is a trusted and verified algorithm used for
+salting and hashing passwords securely. A strength of 17 roughly translates to
+131,000 iterations of the SHA-256 hashing algorithm on the salted password.
+
+To verify passwords, the input password is similarly hashed with the same
+strength and the two hashes are compared to confirm a sucessful entry of the
+correct password. With this scheme, passwords are never persisted in plain text.
+
+** JSON Web Tokens and JSON Web Keys
+[[https://jwt.io/][JSON Web Tokens]](JWT) are an industry standard that is fast being adopted as part
+of the authentication schemes of web services and APIs. JSON Web Keys(JWK) is a
+format specifying the algorithm and the key to be used in generating JWTs. JWTs
+allow us to transmit signed and encrypted information over HTTP. This
+information is passed via HTTP headers. In my implementation a JWT is used for
+the authentication token for the user. This token is a signed and encrypted copy
+of the user's account. When a verification request comes in, the token stored in
+the HTTP headers is decrypted by the authenticaiton service. If it hasn't been
+tampered with and the user is authorised to perform an action the service
+requesting feedback from the authentication service will be given the all-clear.
+Otherwise, a ~401 Unauthorized~ will be given to the calling service which will
+handle this failure by propagating it to the user or otherwise handling it.

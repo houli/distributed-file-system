@@ -1,5 +1,5 @@
 #+SETUPFILE: readthe.org
-#+TITLE: Distributed File System - Eoin Houlihan 13323304
+#+TITLE: Distributed File System
 #+AUTHOR: Eoin Houlihan - 13323304
 The goal of this project was to create a distributed file system. In this report
 I outline my approach to the high-level system design of the file system
