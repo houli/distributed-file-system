@@ -17,6 +17,7 @@ Lastly, a set of useful scripts and this documentation is also included.
 #+INCLUDE: authentication.org
 #+INCLUDE: directory.org
 #+INCLUDE: fileservice.org
+#+INCLUDE: replication.org
 #+INCLUDE: locking.org
 #+INCLUDE: fusefsdriver.org
 #+INCLUDE: migrator.org
