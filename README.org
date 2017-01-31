@@ -3,7 +3,7 @@
 
 ** Building
 #+BEGIN_SRC bash
-$ ./build.sh
+$ scripts/build.sh
 #+END_SRC
 
 ** Running
