@@ -39,11 +39,13 @@ correct password. With this scheme, passwords are never persisted in plain text.
 of the authentication schemes of web services and APIs. JSON Web Keys(JWK) is a
 format specifying the algorithm and the key to be used in generating JWTs. JWTs
 allow us to transmit signed and encrypted information over HTTP. This
-information is passed via HTTP headers. In my implementation a JWT is used for
-the authentication token for the user. This token is a signed and encrypted copy
-of the user's account. When a verification request comes in, the token stored in
-the HTTP headers is decrypted by the authenticaiton service. If it hasn't been
-tampered with and the user is authorised to perform an action the service
-requesting feedback from the authentication service will be given the all-clear.
-Otherwise, a ~401 Unauthorized~ will be given to the calling service which will
-handle this failure by propagating it to the user or otherwise handling it.
+information is passed via HTTP headers.
+
+In my implementation a JWT is used for the authentication token for the user.
+This token is a signed and encrypted copy of the user's account. When a
+verification request comes in, the token stored in the HTTP headers is decrypted
+by the authenticaiton service. If it hasn't been tampered with and the user is
+authorised to perform an action the service requesting feedback from the
+authentication service will be given the all-clear. Otherwise, a ~401
+Unauthorized~ will be given to the calling service which will handle this
+failure by propagating it to the user or otherwise handling it.
