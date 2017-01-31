@@ -73,10 +73,10 @@ writeFileImpl maybeToken file = authenticate maybeToken $ do
 
 writeAndReplicate :: HTTPFile -> App NoContent
 writeAndReplicate file = do
-    writeToDisk file
-    manager <- asks manager
-    liftIO $ forkIO $ doReplicateRequest manager file -- Run replicate request asynchronously in another thread
-    pure NoContent
+  writeToDisk file
+  manager <- asks manager
+  liftIO $ forkIO $ doReplicateRequest manager file -- Run replicate request asynchronously in another thread
+  pure NoContent
 
 doReplicateRequest :: MonadIO m => Manager -> HTTPFile -> m ()
 doReplicateRequest manager file = liftIO $ do
