@@ -723,7 +723,7 @@ hr{
     position:fixed;
     top:0;
     left:0;
-    width:300px;
+    width:25%;
     overflow-x:hidden;
     overflow-y:scroll;
     height:100%;
@@ -825,7 +825,7 @@ footer p{
     position:fixed;
     bottom:0;
     left:0;
-    width:300px;
+    width:25%;
     color:#fcfcfc;
     background:#1f1d1d;
     border-top:solid 10px #343131;
