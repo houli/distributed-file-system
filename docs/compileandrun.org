@@ -1,1 +1,33 @@
 * Compiling and Running
+** Build Scripts
+Some scripts have been provided in the ~scripts~ directory for building the
+project. ~build.sh~ will create all of the necessary containers to spin up the
+services described in the ~docker-compose.yaml~ file. This isn't strictly
+necessary to run as all of the images for the different systems have been
+published to Docker Hub. You may still choose to run it if you wish or if you
+have modified one of the services.
+
+Also included is ~build_fuse.sh~. This will build and install the FUSE file
+system driver for the system. Be aware that an implementation of FUSE such as
+[[https://osxfuse.github.io/][FUSE for macOS]] must be installed for the driver to have the necessary C
+libraries required to build.
+
+** Other Scripts
+A third script for creating a new user account has been provided. This script is
+called ~create_user.sh~ and should be run after starting up the Docker
+containers. It will allow you to enter a username and password to create a new
+account on the system.
+
+** Running
+Running the main service is as simple as running ~docker-compose up -d~ to
+create all of the necessary containers.
+
+Should you wish to run the FUSE file system driver you will need an empty folder
+to serve as the mount point of the file system and you will have to have run
+~build_fuse.sh~ to install the executable. To execute it run ~stack exec
+dfs-fuse mount_folder~ where ~mount_folder~ is some folder created to serve as
+the mount point. You will be then prompted to enter your username and password
+to authenticate actions to the various services in the system. The root of the
+file system and the directory listing will be available at the mount point and
+you can then use the file system with your usual programs on your computer to
+read and write files.
