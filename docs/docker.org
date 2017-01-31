@@ -1,1 +1,40 @@
 * Use of Docker and Docker Compose
+** Overview
+Handling of multiple distributed nodes for the different services involved was
+an important aspect of the project. I chose to use Docker containers and Docker
+Compose to handle this task.
+
+Each of my services was self contained in its own Docker container. The
+authentication, file, directory and migrator services all have their own
+containers. This allowed for scaling up and down of the number of nodes for each
+of the services in the network with less overhead than the traditional approach
+of running these services in heavyweight virtual machines. Docker containers
+also allowed transparent isolation between all of my services. Docker containers
+see themselves as their own root file system while still acting under the same
+host operating system. My Postgresql database also ran as its own container
+within the service network.
+
+** Networking
+Networking and automation of creating a collection of nodes was done using
+Docker Compose. The ~docker-compose.yaml~ file outlines each of the containers
+that is involved in running the distributed file system. As multiple Docker
+containers need to talk to each other Docker Compose by default creates a
+network for the services listed in the file. I also created a seperate network
+for the file services. In this way file services could communicate with each
+other on a seperate network enclosed from the other services listed in the file.
+
+** Custom ~stack-run~ Image
+The limitations of the Docker Compose system only allow services to depend on
+the startup of other service containers. There is no notion of a service being
+fully ready and booted up to the point that it can start servicing requests. I
+made use of a small ~bash~ script called [[https://github.com/vishnubob/wait-for-it][~wait-for-it~]] to give containers the
+ability to wait for full startup of other containers. I took the base
+~stack-run~ image and baked the ~wait-for-it~ script into it. This served as the base
+image for all of my services.
+
+** Docker Hub
+All of the services created as part of the project have been pushed to [[https://hub.docker.com/u/houli/][my
+account]] on Docker Hub. This includes the [[https://hub.docker.com/r/houli/stack-run/][custom ~stack-run~ image]] described
+above which may be useful to others developing Haskell services with Docker
+Compose. This means that running this system on a remote node would only require
+transferring the ~docker-compose.yaml~ and running ~docker-compose up -d~.
