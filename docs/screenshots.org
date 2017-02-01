@@ -1,1 +1,9 @@
 * Screenshots and Demonstration
+** FUSE File System Demonstration
+[[file:img/fuse_demo.gif]]
+
+** Creating a New User
+[[file:img/create_user.png]]
+
+** Running Docker Services
+[[file:img/docker_services.png]]
