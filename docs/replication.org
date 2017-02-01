@@ -1,1 +1,15 @@
 * Replication Across File Nodes
+Replication of documents occurs when a file write happens to a primary. The
+primary looks up the other nodes registered in the system. It then chooses one
+of them randomly to serve as a secondary witness to the write and tells it to
+replicate the file contents. This happens on a lightweight asynchronous thread
+so that the user can receive the response from the primary that the primary
+write has happened while the replication occurs in the background between
+services.
+
+In this scheme, the primary node now has failover should it ever go down. We
+have ensured that writes that occur on a primary have at least 1 other copy and
+that the copy is placed on another node that is also visible to directory
+servers within the system. This is important as we do not want replication
+across nodes that are no longer reachable by directory services due to crashes
+or network partitioning.
