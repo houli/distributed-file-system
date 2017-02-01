@@ -1,0 +1,897 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-02-01 Wed 23:04 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Distributed File System</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Eoin Houlihan - 13323304" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="css/htmlize.css" />
+<link rel="stylesheet" type="text/css" href="css/readtheorg.css" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="js/readtheorg.js"></script>
+<style>pre.src {background-color: #222; color: #fff; font-family: "Fira Code", "Lucida Console", Monaco, monospace} pre {box-shadow: none;}</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Distributed File System</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org83600bd">1. High-level System Architecture and Design</a></li>
+<li><a href="#orgf50eecd">2. Authentication Service and Users</a>
+<ul>
+<li><a href="#org399a1e3">2.1. Overview</a></li>
+<li><a href="#org2bb21b3">2.2. Endpoints</a></li>
+<li><a href="#orgf5eda32">2.3. PBKDF1 Salting and Hashing Algorithm</a></li>
+<li><a href="#org6958a04">2.4. JSON Web Tokens and JSON Web Keys</a></li>
+</ul>
+</li>
+<li><a href="#org9d4370d">3. Directory Service</a>
+<ul>
+<li><a href="#org012bc44">3.1. Overview</a></li>
+<li><a href="#org418d92f">3.2. File Listing</a></li>
+<li><a href="#orge49824b">3.3. Querying File Locations</a></li>
+<li><a href="#org8f91ad2">3.4. Round-Robin Allocation of File Nodes</a></li>
+<li><a href="#orgba9bc02">3.5. File Node Registration</a></li>
+</ul>
+</li>
+<li><a href="#org116d24e">4. File Service</a>
+<ul>
+<li><a href="#org45a3963">4.1. Overview</a></li>
+<li><a href="#orgbcf63cb">4.2. Reading a File</a></li>
+<li><a href="#org6901d18">4.3. Writing to a File</a></li>
+</ul>
+</li>
+<li><a href="#org068c198">5. Replication Across File Nodes</a></li>
+<li><a href="#orga0eade8">6. Locking Scheme</a></li>
+<li><a href="#org6229cb2">7. FUSE File System Driver</a>
+<ul>
+<li><a href="#org886cb85">7.1. Overview</a></li>
+<li><a href="#org1ac7ec5">7.2. Implemented FUSE Features</a></li>
+<li><a href="#orgfc2999c">7.3. Authentication</a></li>
+<li><a href="#org08cec02">7.4. Limitations</a></li>
+</ul>
+</li>
+<li><a href="#org095b686">8. Migrator Service</a></li>
+<li><a href="#orgf4397a5">9. Use of Docker and Docker Compose</a>
+<ul>
+<li><a href="#orgd0aa11a">9.1. Overview</a></li>
+<li><a href="#org79aaec4">9.2. Networking</a></li>
+<li><a href="#org83f4189">9.3. Custom <code>stack-run</code> Image</a></li>
+<li><a href="#orga68a637">9.4. Docker Hub</a></li>
+</ul>
+</li>
+<li><a href="#org3d56c4e">10. Compiling and Running</a>
+<ul>
+<li><a href="#org5216335">10.1. Build Scripts</a></li>
+<li><a href="#orgcc327d3">10.2. Other Scripts</a></li>
+<li><a href="#orge3df733">10.3. Running</a></li>
+</ul>
+</li>
+<li><a href="#org84659bb">11. Screenshots and Demonstration</a>
+<ul>
+<li><a href="#orga26493b">11.1. FUSE File System Demonstration</a></li>
+<li><a href="#org7fc8d92">11.2. Creating a New User</a></li>
+<li><a href="#org1504b56">11.3. Running Docker Services</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+The goal of this project was to create a distributed file system. In this report
+I outline my approach to the high-level system design of the file system
+including technology used and system architecture. The individual sections
+detail the more intricate aspects of the implementation of each of the systems
+and gives justification for specific decisions made and the advantages and
+tradeoffs caused by these decisions.
+</p>
+
+<p>
+Included in the source code repository is the source for my authentication,
+directory, file and migrator services. Also included is a FUSE based file system
+driver that can be used to access my file system at the operating system level.
+Lastly, a set of useful scripts and this documentation is also included.
+</p>
+
+<div id="outline-container-org83600bd" class="outline-2">
+<h2 id="org83600bd"><span class="section-number-2">1</span> High-level System Architecture and Design</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The approach taken in the design of this system is very similar to that of the
+Andrew File System (AFS). In the system created I placed an emphasis on the
+simple model of last write wins. This ensures an always consistent view at the
+contents of a particular file however may introduce issues to do with lost
+writes should a client fail to win the write race.
+</p>
+
+<p>
+The system was implemented as a set of Haskell REST services implemented using
+the <a href="https://hackage.haskell.org/package/servant"><code>servant</code></a> library to define the APIs of each service. These services
+included a file service that I was able to create multiple copies of using
+Docker and Docker Compose, a directory service and an authentication service. An
+auxiliary database migration service was created to ensure database consistency.
+Of course this also implies the use of a database system. I chose to use the
+robust Postgresql RDBMS with the tried and tested <code>persistent</code> Haskell package
+to interface with it.
+</p>
+
+<p>
+A number of shared data models were necessary to create to model the different
+kinds of values of entities involved in the system. The following schema diagram
+relates the file, node, and user tables as they appear in my system.
+<img src="img/schema.png" alt="schema.png" />
+</p>
+</div>
+</div>
+<div id="outline-container-orgf50eecd" class="outline-2">
+<h2 id="orgf50eecd"><span class="section-number-2">2</span> Authentication Service and Users</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-org399a1e3" class="outline-3">
+<h3 id="org399a1e3"><span class="section-number-3">2.1</span> Overview</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+The authentication service was the first service designed and implemented. It
+serves as a gateway for other services to verify that a user has the correct
+authentication and permissions to perform an action in the system. For example,
+we may want to ensure that a user is logged in and has access to a particular
+file before we service any request for that user to read or write that file. A
+failure to log in or lack of permissions means that the authentication service
+should deny that particular request.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2bb21b3" class="outline-3">
+<h3 id="org2bb21b3"><span class="section-number-3">2.2</span> Endpoints</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+Three endpoints have been provided as part of the implementation of this
+service. The first is a registration endpoint that allows a user to create a new
+account on the system. Users who create accounts are automatically authenticated
+and given their authentication token. The second endpoint allows users to log in
+to the system using pre-existing account credentials and gives back their
+authentication token if they provide the correct details. The final endpoint
+allows other services in the system to verify the authenticity of a users token
+to ensure they have the correct access to perform actions such as listing files
+or reading and writing files.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf5eda32" class="outline-3">
+<h3 id="orgf5eda32"><span class="section-number-3">2.3</span> PBKDF1 Salting and Hashing Algorithm</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Secure storage of user credentials is a vital part of any secure system.
+Fortunately, the Haskell ecosystem provides many strong cryptographic libraries
+for handling information that needs to be stored securely. The library used by
+the authentication service to store passwords is <a href="https://hackage.haskell.org/package/pwstore-fast"><code>pwstore-fast</code></a>.
+</p>
+
+<p>
+To encrypt user passwords the default PBKDF1 algorithm is used with the
+recommended strength of 17. PBKDF1 is a trusted and verified algorithm used for
+salting and hashing passwords securely. A strength of 17 roughly translates to
+131,000 iterations of the SHA-256 hashing algorithm on the salted password.
+</p>
+
+<p>
+To verify passwords, the input password is similarly hashed with the same
+strength and the two hashes are compared to confirm a sucessful entry of the
+correct password. With this scheme, passwords are never persisted in plain text.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6958a04" class="outline-3">
+<h3 id="org6958a04"><span class="section-number-3">2.4</span> JSON Web Tokens and JSON Web Keys</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+<a href="https://jwt.io/">JSON Web Tokens</a>(JWT) are an industry standard that is fast being adopted as part
+of the authentication schemes of web services and APIs. JSON Web Keys(JWK) is a
+format specifying the algorithm and the key to be used in generating JWTs. JWTs
+allow us to transmit signed and encrypted information over HTTP. This
+information is passed via HTTP headers.
+</p>
+
+<p>
+In my implementation a JWT is used for the authentication token for the user.
+This token is a signed and encrypted copy of the user's account. When a
+verification request comes in, the token stored in the HTTP headers is decrypted
+by the authenticaiton service. If it hasn't been tampered with and the user is
+authorised to perform an action the service requesting feedback from the
+authentication service will be given the all-clear. Otherwise, a <code>401
+Unauthorized</code> will be given to the calling service which will handle this
+failure by propagating it to the user or otherwise handling it.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org9d4370d" class="outline-2">
+<h2 id="org9d4370d"><span class="section-number-2">3</span> Directory Service</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-org012bc44" class="outline-3">
+<h3 id="org012bc44"><span class="section-number-3">3.1</span> Overview</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+There are 4 main features that the directory service set out to support.
+Firstly, and most importantly it would need to be able to give a full listing of
+all of the files currently registered in the system. Secondly, it needed to
+provide a way to query the location of a specific file so that it could be read
+from or written to. Thirdly, the directory service needed to provide a way to
+indicate which node was to be given a write file request when a user attempts to
+write to the file system. The final duty performed by the directory service is
+to manage the registered and currently online file nodes. An endpoint is
+provided for a file node to interact with and register that they have come
+online.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org418d92f" class="outline-3">
+<h3 id="org418d92f"><span class="section-number-3">3.2</span> File Listing</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+The implementation of file listing is very straight forward. An authenticated
+request to the <code>ls</code> endpoint results in the user receiving back a list of all
+files that the system is currently aware are stored on the file service nodes.
+This includes all the data from the database schema such as the node id where
+that particular file is stored and the size of the stored file on disk.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge49824b" class="outline-3">
+<h3 id="orge49824b"><span class="section-number-3">3.3</span> Querying File Locations</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+A <code>whereis</code> endpoint was provided to query the node of a particular file. The
+user provides a path to a given file within the file system. The server responds
+either with a <code>404</code> if it cannot find any reference to that path across any of
+the file nodes or returns the node information and remote port of the node if
+the file exists currently.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8f91ad2" class="outline-3">
+<h3 id="org8f91ad2"><span class="section-number-3">3.4</span> Round-Robin Allocation of File Nodes</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+To reduce the impact of a file node going down or becoming unreachable due to a
+network partition, a scheme was drawn up to ensure that roughly equal writes
+occur across all file nodes that are registered. The method chosen was a
+round-robin scheme based on the least recently used file node. If the file at
+the path already has been saved and its primary node is accessible and online
+then the writes will be directed to that primary node. Otherwise, a round-robin
+node will be selected to store the new file being added to the system.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgba9bc02" class="outline-3">
+<h3 id="orgba9bc02"><span class="section-number-3">3.5</span> File Node Registration</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+The directory service should maintain a record of all file nodes that have
+successfully started up. For this reason, an endpoint is provided by the
+directory service to register a file node. This registration information is
+important in letting the directory service to issue responses to round-robin
+requests to write files. It also allows the system to know what is currently up.
+Multiple requests from the same file node can act as a sort of heartbeat that
+the node is still up and ready to service file requests.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org116d24e" class="outline-2">
+<h2 id="org116d24e"><span class="section-number-2">4</span> File Service</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-org45a3963" class="outline-3">
+<h3 id="org45a3963"><span class="section-number-3">4.1</span> Overview</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+There are 3 main functions provided by the file service. These are the ability
+to read files, write to files and to receive replication requests from other
+file service nodes.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbcf63cb" class="outline-3">
+<h3 id="orgbcf63cb"><span class="section-number-3">4.2</span> Reading a File</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+A user client will have first queried the directory service to determine the
+location of a file in the system. Using this node information it can now request
+from the node the ability to read that file. Reading a file essentially amounts
+to returning the base64 encoded contents of the file.
+</p>
+
+<p>
+Base64 is used as an example in this system of the capability to "encrypt"
+files. In a production environment outside of a pedagogical setting it would
+make more sense to leverage more advanced techniques such as asymmetric
+cryptography using key pairs to share files. However, this implementation is a
+proof of concept of applying some kind of processing to the data being sent
+across the wire so as to provide a framework for more secure implementations
+building on top of the existing work.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6901d18" class="outline-3">
+<h3 id="org6901d18"><span class="section-number-3">4.3</span> Writing to a File</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+Very much similar to reading from a file, writing to a file occurs on a single
+primary node. Again base64 encoded contents are sent to the file system which
+will decode and store the raw file contents. Other pertinent information such as
+file sizes should also be reflected in the database representation of the file
+and care is taken to appropriately update metadata of existing files in the case
+of writing to a file that already existed on this primary.
+</p>
+
+<p>
+Where the implementation differs from reading is the need to replicate the file
+information to 1 or more other file nodes so that redundancy is introduced
+should this primary die or become unreachable by other services. This is
+explained in the next section.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org068c198" class="outline-2">
+<h2 id="org068c198"><span class="section-number-2">5</span> Replication Across File Nodes</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Replication of documents occurs when a file write happens to a primary. The
+primary looks up the other nodes registered in the system. It then chooses one
+of them randomly to serve as a secondary witness to the write and tells it to
+replicate the file contents. This happens on a lightweight asynchronous thread
+so that the user can receive the response from the primary that the primary
+write has happened while the replication occurs in the background between
+services.
+</p>
+
+<p>
+In this scheme, the primary node now has failover should it ever go down. We
+have ensured that writes that occur on a primary have at least 1 other copy and
+that the copy is placed on another node that is also visible to directory
+servers within the system. This is important as we do not want replication
+across nodes that are no longer reachable by directory services due to crashes
+or network partitioning.
+</p>
+</div>
+</div>
+<div id="outline-container-orga0eade8" class="outline-2">
+<h2 id="orga0eade8"><span class="section-number-2">6</span> Locking Scheme</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+The locking scheme was implemented as a per-node locking system. This meant that
+if a file was to be edited it could only occur on a single node and then that
+update would be propagated to other replica nodes.
+</p>
+
+<p>
+For example, if a file <code>hello.txt</code> already existed, the directory service would
+indicate this and direct the client to the correct node. In this way, clients
+would know where they needed to go to get a lock on the file and write to it.
+This prevents multiple clients from attempting to write to a single file across
+multiple nodes.
+</p>
+
+<p>
+There are drawbacks to this approach however. The locks provided by this system
+are quite coarse and occur at the node level rather than on particular actions
+on a file such as reads and writes. A more fine-grained system would allow
+multiple locks such as a read lock and a write lock across multiple nodes for a
+single file. The benefit provided by the taken approach are the simplicity of
+implementation and the ease of understanding for those implementing clients to interact
+with the distributed file system.
+</p>
+</div>
+</div>
+<div id="outline-container-org6229cb2" class="outline-2">
+<h2 id="org6229cb2"><span class="section-number-2">7</span> FUSE File System Driver</h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-org886cb85" class="outline-3">
+<h3 id="org886cb85"><span class="section-number-3">7.1</span> Overview</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+FUSE is a library and set of kernel extensions for your operating system that
+allow file systems to run in user-space. Implementations such as <a href="https://osxfuse.github.io">FUSE for macOS</a>
+exist and allow users to install and use these user-space file system drivers. I
+have provided a FUSE driver as part of this project. This allows the user to use
+my distributed file system with all of the existing applications on their
+computer.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1ac7ec5" class="outline-3">
+<h3 id="org1ac7ec5"><span class="section-number-3">7.2</span> Implemented FUSE Features</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+The FUSE driver is implemented using the <a href="https://hackage.haskell.org/package/HFuse">HFuse</a> Haskell bindings. The main file
+system actions that you would expect such as read, list directory and write file
+are all implemented.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfc2999c" class="outline-3">
+<h3 id="orgfc2999c"><span class="section-number-3">7.3</span> Authentication</h3>
+<div class="outline-text-3" id="text-7-3">
+<p>
+The FUSE driver performs all actions according to the protocol defined in the
+previous sections. This includes authentication. The driver ensures that a user
+correctly signs into the system before it will mount the file system on the
+mount point.
+</p>
+
+<p>
+Following on from that, all requests are made using the authenticated user's
+token so that the backend services can properly verify that the user has
+permission to carry out the file system action that they are attempting.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org08cec02" class="outline-3">
+<h3 id="org08cec02"><span class="section-number-3">7.4</span> Limitations</h3>
+<div class="outline-text-3" id="text-7-4">
+<p>
+Unfortunately there are a few bugs with my implementation. Files written using
+the FUSE driver have to be a maximum of 4KB large. This does not apply when
+using the API directly. This is because FUSE drivers receive file writes in 4KB
+blocks and my implementation is yet to handle collecting these into a single
+write to the appropriate file node.
+</p>
+
+<p>
+Another bug is in file truncation. If editing a file results only in a reduction
+of bytes at the end the system will fail to properly truncate it. Saving should
+only be done so that it would increase the number of bytes in the file.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org095b686" class="outline-2">
+<h2 id="org095b686"><span class="section-number-2">8</span> Migrator Service</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+As outlined earlier, my system architecture includes a Postgresql database. This
+database is responsible for keeping track of shared data models between the
+different services that are running. As such, it needs to be in a consistent
+state when our services start up to avoid errors.
+</p>
+
+<p>
+One of the problems I initially faced was that all services required this
+database consistency to operate properly. If the database migrations had yet to
+be run when services started up they could potentially crash due to tables not
+existing or not being properly updated to match the current version of the
+database schema. To solve this, I introduced the migrator service. The migrator
+service handles running migrations on our Postgresql database and ensuring that
+it completes successfully before any other dependent service such as the
+authentication service or directory service starts up.
+</p>
+
+<p>
+This is done by making use of the dependency mechanism of Docker Compose. First,
+our migrator starts up and waits for our database to become accessible over the
+network. Once the database comes online, our migrator service is free to update
+the database and make it consistent with our schema. It then runs a TCP server
+responding to all requests indefinitely. This is what allows the dependent
+services know that our migrations have been completed and that the database has
+reached a consistent state. These dependent services are now free to start up
+and handle HTTP requests.
+</p>
+
+<p>
+This is a very simple design but has a number of benefits. If our migrator
+service ever disappears we cannot assume that our database is in a consistent
+state and our other dependent services will fail to start. If our migrator
+crashes again we cannot assume the above. In this design any failure to reach
+the migrator service will automatically cause the failure of services that rely
+on the database and they will never start running against a potentially
+incorrect schema of the database.
+</p>
+</div>
+</div>
+<div id="outline-container-orgf4397a5" class="outline-2">
+<h2 id="orgf4397a5"><span class="section-number-2">9</span> Use of Docker and Docker Compose</h2>
+<div class="outline-text-2" id="text-9">
+</div><div id="outline-container-orgd0aa11a" class="outline-3">
+<h3 id="orgd0aa11a"><span class="section-number-3">9.1</span> Overview</h3>
+<div class="outline-text-3" id="text-9-1">
+<p>
+Handling of multiple distributed nodes for the different services involved was
+an important aspect of the project. I chose to use Docker containers and Docker
+Compose to handle this task.
+</p>
+
+<p>
+Each of my services was self contained in its own Docker container. The
+authentication, file, directory and migrator services all have their own
+containers. This allowed for scaling up and down of the number of nodes for each
+of the services in the network with less overhead than the traditional approach
+of running these services in heavyweight virtual machines. Docker containers
+also allowed transparent isolation between all of my services. Docker containers
+see themselves as their own root file system while still acting under the same
+host operating system. My Postgresql database also ran as its own container
+within the service network.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org79aaec4" class="outline-3">
+<h3 id="org79aaec4"><span class="section-number-3">9.2</span> Networking</h3>
+<div class="outline-text-3" id="text-9-2">
+<p>
+Networking and automation of creating a collection of nodes was done using
+Docker Compose. The <code>docker-compose.yaml</code> file outlines each of the containers
+that is involved in running the distributed file system. As multiple Docker
+containers need to talk to each other Docker Compose by default creates a
+network for the services listed in the file. I also created a seperate network
+for the file services. In this way file services could communicate with each
+other on a seperate network enclosed from the other services listed in the file.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org83f4189" class="outline-3">
+<h3 id="org83f4189"><span class="section-number-3">9.3</span> Custom <code>stack-run</code> Image</h3>
+<div class="outline-text-3" id="text-9-3">
+<p>
+The limitations of the Docker Compose system only allow services to depend on
+the startup of other service containers. There is no notion of a service being
+fully ready and booted up to the point that it can start servicing requests. I
+made use of a small <code>bash</code> script called <a href="https://github.com/vishnubob/wait-for-it"><code>wait-for-it</code></a> to give containers the
+ability to wait for full startup of other containers. I took the base
+<code>stack-run</code> image and baked the <code>wait-for-it</code> script into it. This served as the base
+image for all of my services.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga68a637" class="outline-3">
+<h3 id="orga68a637"><span class="section-number-3">9.4</span> Docker Hub</h3>
+<div class="outline-text-3" id="text-9-4">
+<p>
+All of the services created as part of the project have been pushed to <a href="https://hub.docker.com/u/houli/">my
+account</a> on Docker Hub. This includes the <a href="https://hub.docker.com/r/houli/stack-run/">custom <code>stack-run</code> image</a> described
+above which may be useful to others developing Haskell services with Docker
+Compose. This means that running this system on a remote node would only require
+transferring the <code>docker-compose.yaml</code> and running <code>docker-compose up -d</code>.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org3d56c4e" class="outline-2">
+<h2 id="org3d56c4e"><span class="section-number-2">10</span> Compiling and Running</h2>
+<div class="outline-text-2" id="text-10">
+</div><div id="outline-container-org5216335" class="outline-3">
+<h3 id="org5216335"><span class="section-number-3">10.1</span> Build Scripts</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+Some scripts have been provided in the <code>scripts</code> directory for building the
+project. <code>build.sh</code> will create all of the necessary containers to spin up the
+services described in the <code>docker-compose.yaml</code> file. This isn't strictly
+necessary to run as all of the images for the different systems have been
+published to Docker Hub. You may still choose to run it if you wish or if you
+have modified one of the services.
+</p>
+
+<p>
+Also included is <code>build_fuse.sh</code>. This will build and install the FUSE file
+system driver for the system. Be aware that an implementation of FUSE such as
+<a href="https://osxfuse.github.io/">FUSE for macOS</a> must be installed for the driver to have the necessary C
+libraries required to build.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgcc327d3" class="outline-3">
+<h3 id="orgcc327d3"><span class="section-number-3">10.2</span> Other Scripts</h3>
+<div class="outline-text-3" id="text-10-2">
+<p>
+A third script for creating a new user account has been provided. This script is
+called <code>create_user.sh</code> and should be run after starting up the Docker
+containers. It will allow you to enter a username and password to create a new
+account on the system.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge3df733" class="outline-3">
+<h3 id="orge3df733"><span class="section-number-3">10.3</span> Running</h3>
+<div class="outline-text-3" id="text-10-3">
+<p>
+Running the main service is as simple as running <code>docker-compose up -d</code> to
+create all of the necessary containers.
+</p>
+
+<p>
+Should you wish to run the FUSE file system driver you will need an empty folder
+to serve as the mount point of the file system and you will have to have run
+<code>build_fuse.sh</code> to install the executable. To execute it run <code>stack exec
+dfs-fuse mount_folder</code> where <code>mount_folder</code> is some folder created to serve as
+the mount point. You will be then prompted to enter your username and password
+to authenticate actions to the various services in the system. The root of the
+file system and the directory listing will be available at the mount point and
+you can then use the file system with your usual programs on your computer to
+read and write files.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org84659bb" class="outline-2">
+<h2 id="org84659bb"><span class="section-number-2">11</span> Screenshots and Demonstration</h2>
+<div class="outline-text-2" id="text-11">
+</div><div id="outline-container-orga26493b" class="outline-3">
+<h3 id="orga26493b"><span class="section-number-3">11.1</span> FUSE File System Demonstration</h3>
+<div class="outline-text-3" id="text-11-1">
+
+<div class="figure">
+<p><img src="img/fuse_demo.gif" alt="fuse_demo.gif" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7fc8d92" class="outline-3">
+<h3 id="org7fc8d92"><span class="section-number-3">11.2</span> Creating a New User</h3>
+<div class="outline-text-3" id="text-11-2">
+
+<div class="figure">
+<p><img src="img/create_user.png" alt="create_user.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1504b56" class="outline-3">
+<h3 id="org1504b56"><span class="section-number-3">11.3</span> Running Docker Services</h3>
+<div class="outline-text-3" id="text-11-3">
+
+<div class="figure">
+<p><img src="img/docker_services.png" alt="docker_services.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Eoin Houlihan - 13323304</p>
+<p class="date">Created: 2017-02-01 Wed 23:04</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
