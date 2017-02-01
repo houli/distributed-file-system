@@ -1,12 +1,7 @@
-#+TITLE: Distributed File System
+#+TITLE: Distributed File System - Eoin Houlihan 13323304
 #+OPTIONS: toc:nil
 
-** Building
-#+BEGIN_SRC bash
-$ scripts/build.sh
-#+END_SRC
-
-** Running
-#+BEGIN_SRC bash
-$ docker-compose up -d
-#+END_SRC
+* Documentation
+Full documentation with instructions on how to build and run the project can be
+found on [[https://houli.github.io/distributed-file-system][GitHub pages]]. Alternatively, a PDF of the report has been uploaded to
+the [[https://github.com/houli/distributed-file-system/releases/tag/1.0][releases]] page.
